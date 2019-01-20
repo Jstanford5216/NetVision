@@ -1,0 +1,23 @@
+<!--<h1 [class.gray]="h1Style">Home</h1> if h1style is true set to gray style-->
+
+<!-- <h1 [ngClass]="{
+  'gray': h1Style,
+  'large': !h1Style
+}">Home</h1> if h1style is true set to gray else set to class caled large -->
+
+<!--<h1 [style.color]=" h1Style ? 'gray' : 'black' ">Home</h1> Can set style properties. '?' if, ':' else-->
+
+<!-- <h1 [ngStyle]="{
+  'color' : h1Style ? 'gray' : 'black',
+  'font-size' : !h1Style ? '1em' : '4em'
+}">Home</h1> -->
+
+<h1>Home</h1>
+
+<p>Select a router:</p>
+
+<select (change)="btnClick()">
+  <option *ngFor="let router of routers" [value]="router.name">
+    {{router.name}}
+  </option>
+</select>
