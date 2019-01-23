@@ -20,14 +20,15 @@ export class HomeComponent implements OnInit {
     this.routers = [
       { name: "router01", ip: "192.168.128.129" },
       { name: "router02", ip: "192.168.128.131" }
-    ]
+    ];
 
   }
 
-  btnClick() {
+  btnClick($scope) {
     /* this.h1Style = true;
     console.log("clicked"); setting bool and logging to console */
-    this.data.playBook().subscribe(data => {
+
+    this.data.playBook($scope).subscribe(data => {
       this.response = data
       console.log(this.response)
       console.log("Applied")
