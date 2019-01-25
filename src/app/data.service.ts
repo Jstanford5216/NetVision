@@ -15,14 +15,12 @@ export class DataService {
     
     const httpOptions = {
       headers: new HttpHeaders({
-        'Content-Type':  'application/json',
-        'Access-Control-Allow-Origin': 'Origin'
+        'Content-Type':  'application/json'
       })
     };
     var body = {
 
     };
-
-    return this.http.post("https://192.168.213.129/api/v2/job_templates/7/launch/",body,httpOptions);
+    return this.http.post("https://192.168.128.136/api/v2/job_templates/7/launch/",body,httpOptions);
   }
 }
