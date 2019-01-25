@@ -9,9 +9,8 @@ export class DataService {
 
   constructor(private http: HttpClient) { }
 
-  playBook($scope){
-
-    console.log($scope);
+  playBook($selected){
+    console.log($selected);
     
     const httpOptions = {
       headers: new HttpHeaders({

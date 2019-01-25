@@ -24,11 +24,11 @@ export class HomeComponent implements OnInit {
 
   }
 
-  btnClick($scope) {
+  btnClick($selected) {
     /* this.h1Style = true;
     console.log("clicked"); setting bool and logging to console */
 
-    this.data.playBook($scope).subscribe(data => {
+    this.data.playBook($selected).subscribe(data => {
       this.response = data
       console.log(this.response)
       console.log("Applied")

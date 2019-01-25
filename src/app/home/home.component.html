@@ -16,8 +16,8 @@
 
 <p>Select a router:</p>
 
-<select (change)="btnClick()">
-  <option *ngFor="let router of routers" [value]="router.name">
+<select>
+  <option *ngFor="let router of routers" [value]="router.name" (change)="btnClick(router.name)">
     {{router.name}}
   </option>
 </select>
