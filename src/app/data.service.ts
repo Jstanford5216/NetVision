@@ -20,6 +20,6 @@ export class DataService {
     var body = {
 
     };
-    return this.http.post("https://192.168.0.29/api/v2/job_templates/7/launch/",body,httpOptions);
+    return this.http.post("http://192.168.0.29:8000/api/v2/job_templates/7/launch/",body,httpOptions);
   }
 }
