@@ -20,6 +20,6 @@ export class DataService {
     var body = {
 
     };
-    return this.http.post("https://192.168.0.39/api/v2/job_templates/7/launch/",null,httpOptions);
+    return this.http.post("https://192.168.0.39/api/v2/job_templates/7/launch?bearer_token=FD7GaHNEYg7yfLJpZTyXcJp0vpK5Nw",null);
   }
 }
