@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -14,12 +13,12 @@ export class DataService {
     
     const httpOptions = {
       headers: new HttpHeaders({
-      'Authorization': 'Bearer FD7GaHNEYg7yfLJpZTyXcJp0vpK5Nw'
+      'Content-Type': 'application/json',
       })
     };
     var body = {
+    };    
 
-    };
-    return this.http.post("https://192.168.0.39/api/v2/job_templates/7/launch?bearer_token=FD7GaHNEYg7yfLJpZTyXcJp0vpK5Nw",null);
+    return this.http.post("API URI HERE",body,httpOptions);
   }
 }
