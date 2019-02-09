@@ -1,5 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+var Ansible = require('node-ansible');
 
 const app = express();
 
@@ -22,8 +23,30 @@ app.route('/api/:name').get((req, res,next) => {
   });
   
 app.route('/api/').post((req, res,next) => {
-  //ssh 
+  
+  console.log(process.cwd())
+
+  //Output sent value
   console.log(req.name);
+  //Create command
+  var command = new Ansible.Playbook().playbook('./playbooks/backup_devices');
+                                    //.variables({ foo: 'bar' });
+  //Set inventory
+  command.inventory('./playbooks/hosts');
+  
+  //live result
+  /* command.on('stdout', function(data) { console.log(data.toString()); });
+  command.on('stderr', function(data) { console.log(data.toString()); }); */
+  
+  //Execute command
+  var promise = command.exec();
+
+  //Get result from promise
+  promise.then(function(result) {
+    console.log(result.output);
+    console.log(result.code);
+  });
+  
   res.send(201, req.body);
 });
 

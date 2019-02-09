@@ -1,0 +1,49 @@
+# This is the default ansible 'hosts' file.
+#
+# It should live in /etc/ansible/hosts
+#
+#   - Comments begin with the '#' character
+#   - Blank lines are ignored
+#   - Groups of hosts are delimited by [header] elements
+#   - You can enter hostnames or ip addresses
+#   - A hostname/ip can be a member of multiple groups
+
+# Ex 1: Ungrouped hosts, specify before any group headers.
+
+## green.example.com
+## blue.example.com
+## 192.168.100.1
+## 192.168.100.10
+
+# Ex 2: A collection of hosts belonging to the 'routers' group
+[all]
+
+[routers]
+RTR-01 ansible_host=192.168.0.246
+RTR-02 ansible_host=192.168.0.247
+
+#Ex 3: A collection of hosts belonging to the 'switches' group
+
+[switches]
+SWT-01 ansible_host=10.1.0.2
+SWT-02 ansible_host=10.2.0.2
+
+# If you have multiple hosts following a pattern you can specify
+# them like this:
+
+## www[001:006].example.com
+
+# Ex 4: A collection of database servers in the 'dbservers' group
+
+## [dbservers]
+## 
+## db01.intranet.mydomain.net
+## db02.intranet.mydomain.net
+## 10.25.1.56
+## 10.25.1.57
+
+# Here's another example of host ranges, this time there are no
+# leading 0s:
+
+## db-[99:101]-node.example.com
+
