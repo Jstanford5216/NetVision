@@ -2,7 +2,7 @@
   "name": "NetCollab",
   "version": "0.0.0",
   "scripts": {
-    "start": "ng serve --proxy-config proxy.config.json",
+    "start": "ng serve",
     "ng": "ng",
     "build": "ng build",
     "test": "ng test",
