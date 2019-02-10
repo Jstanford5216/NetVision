@@ -11,7 +11,7 @@ app.listen(3000, () => {
 app.use(bodyParser.json());
 
 app.use(function(res,res,next) {
-  res.header("Access-Control-Allow-Origin","http://localhost:4200");
+  res.header("Access-Control-Allow-Origin","http://localhost");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE");
   next();
@@ -24,29 +24,20 @@ app.route('/api/:name').get((req, res,next) => {
   
 app.route('/api/').post((req, res,next) => {
   
-  console.log(process.cwd())
-
-  //Output sent value
-  console.log(req.name);
   //Create command
-  var command = new Ansible.Playbook().playbook('./playbooks/backup_devices');
+  var command = new Ansible.Playbook().playbook('backup_devices');
                                     //.variables({ foo: 'bar' });
-  //Set inventory
-  command.inventory('./playbooks/hosts');
   
+  //Set inventory
+  command.inventory('hosts');
+
   //live result
-  /* command.on('stdout', function(data) { console.log(data.toString()); });
-  command.on('stderr', function(data) { console.log(data.toString()); }); */
+  command.on('stdout', function(data) { console.log(data.toString()); });
+  command.on('stderr', function(data) { console.log(data.toString()); }); 
   
   //Execute command
-  var promise = command.exec();
+  var promise = command.exec({cwd:"/etc/ansible/playbooks"});
 
-  //Get result from promise
-  promise.then(function(result) {
-    console.log(result.output);
-    console.log(result.code);
-  });
-  
   res.send(201, req.body);
 });
 
