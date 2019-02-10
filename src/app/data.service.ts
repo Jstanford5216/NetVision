@@ -16,11 +16,8 @@ export class DataService {
   }
 
   playBook($selected){
-    console.log($selected);    
-
     var selectedItem = new Playbook();
-    selectedItem.name = 'router01';
-    selectedItem.ip = $selected;
+    selectedItem.name = $selected.name;
 
     return this.runPlaybook(selectedItem);
   }

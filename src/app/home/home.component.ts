@@ -30,8 +30,7 @@ export class HomeComponent implements OnInit {
 
     this.data.playBook($selected).subscribe(data => {
       this.response = data
-      console.log(this.response)
-      console.log("Applied")
+      
     });
 
   }
