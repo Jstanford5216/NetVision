@@ -12,7 +12,7 @@ export class DataService {
   constructor(private http: HttpClient) { }
 
   runPlaybook(playbook: Playbook): Observable<Playbook> {
-    return this.http.post<Playbook>('http://localhost:3000/api/', playbook);
+    return this.http.post<Playbook>('http://192.168.0.251:3000/api/', playbook);
   }
 
   playBook($selected){

@@ -11,8 +11,8 @@ app.listen(3000, () => {
 app.use(bodyParser.json());
 
 app.use(function(res,res,next) {
-  res.header("Access-Control-Allow-Origin","http://localhost");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  res.header("Access-Control-Allow-Origin","http://192.168.0.251");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Accept");
   res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE");
   next();
 });
