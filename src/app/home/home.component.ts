@@ -11,15 +11,19 @@ export class HomeComponent implements OnInit {
   response: Object;
   //h1Style: boolean = false;
 
-  routers: object;
+  devices: object;
 
   constructor(private data: DataService) { }
 
   ngOnInit() {
     //When component loads
-    this.routers = [
-      { name: "router01", ip: "192.168.128.129" },
-      { name: "router02", ip: "192.168.128.131" }
+    this.devices = [
+      { placeholder: "All routers", name: "routers" },
+      { placeholder: "Router 1", name: "router01" },
+      { placeholder: "Router 2", name: "router02" },
+      { placeholder: "All switches", name: "switches" },
+      { placeholder: "Switch 1", name: "switch01" },
+      { placeholder: "Switch 2", name: "switch02" }
     ];
 
   }

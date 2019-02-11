@@ -14,10 +14,10 @@
 
 <h1>Home</h1>
 
-<p>Select a router:</p>
+<p>Select a device:</p>
 
 <select>
-  <option *ngFor="let router of routers" [value]="router.name" (click)="btnClick(router)">
-    {{router.name}}
+  <option *ngFor="let device of devices" (click)="btnClick(device)">
+    {{device.placeholder}}
   </option>
 </select>
