@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { DataService } from '../data.service';
+import { Playbook } from '../playbook';
 
 @Component({
   selector: 'app-home',
@@ -11,7 +12,11 @@ export class HomeComponent implements OnInit {
   response: Object;
   //h1Style: boolean = false;
 
-  devices: object;
+  devices: Object;
+
+  commands: Object;
+
+  selected: Playbook; 
 
   constructor(private data: DataService) { }
 
@@ -26,13 +31,29 @@ export class HomeComponent implements OnInit {
       { placeholder: "Switch 2", name: "switch02" }
     ];
 
+    this.commands = [
+      { placeholder: "Backup config", name: "backupDevice"},
+      { placeholder: "Restore config", name: "restoreDevice"},
+      { placeholder: "Ospf", name: "ospf"}
+    ];
+
   }
 
-  btnClick($selected) {
+  setCommand($command)
+  {
+    this.selected.command = $command;
+  }
+
+  setDevice($device)
+  {
+    this.selected.device = $device;
+  }
+
+  btnClick() {
     /* this.h1Style = true;
     console.log("clicked"); setting bool and logging to console */
 
-    this.data.playBook($selected).subscribe(data => {
+    this.data.playBook(this.selected).subscribe(data => {
       this.response = data
       
     });

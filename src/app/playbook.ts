@@ -2,5 +2,6 @@ export class Playbook {
     
     constructor() { }
 
-    name: string;
+    device: string;
+    command: string;
 }

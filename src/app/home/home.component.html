@@ -12,15 +12,37 @@
   'font-size' : !h1Style ? '1em' : '4em'
 }">Home</h1> -->
 
-<h1>Home</h1>
+<h4>Home</h4>
 
-<p>Select a device:</p>
+<div class="container">
 
-<select>
-  <option *ngFor="let device of devices" (click)="btnClick(device)">
-    {{device.placeholder}}
-  </option>
-</select>
+  <div class="row">
+    <label class="col-xs-6 pull-left">Select a device:</label>
+    <label class="col-xs-6 ml-2 pull-left">Select a command:</label>
+    <span class="col-xs-8"></span>
+  </div>
+
+  <div class="row">
+
+    <select class="col-xs-2">
+      <option *ngFor="let device of devices" (click)="setDevice(device.name)">
+        {{device.placeholder}}
+      </option>
+    </select>
+
+    <select class="col-xs-2 ml-2">
+        <option *ngFor="let command of commands" (click)="setCommand(command.name)">
+          {{command.name}}
+        </option>
+      </select>
+  <span class="col-xs-8"> </span>
+
+  </div>
+
+ <button mat-button (click)="btnClick()">Run</button>
+
+</div>
+
 <div style="padding-top: 1%;" >
   <svg viewBox="0 0 100 100">
     <g stroke-width="0.5">

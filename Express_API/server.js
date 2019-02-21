@@ -25,8 +25,8 @@ app.route('/api/:name').get((req, res,next) => {
 app.route('/api/').post((req, res,next) => {
   
   //Create command
-  var command = new Ansible.Playbook().playbook('backup_devices')
-                                      .variables({ selectedHost: req.body.name });
+  var command = new Ansible.Playbook().playbook(req.body.command)
+                                      .variables({ selectedHost: req.body.device });
   
   //Set inventory
   command.inventory('hosts');

@@ -16,9 +16,6 @@ export class DataService {
   }
 
   playBook($selected){
-    var selectedItem = new Playbook();
-    selectedItem.name = $selected.name;
-
-    return this.runPlaybook(selectedItem);
+    return this.runPlaybook($selected);
   }
 }
