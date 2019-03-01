@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-var Ansible = require('node-ansible');
+const Ansible = require('node-ansible');
+const shell = require('shelljs');
 
 const app = express();
 
@@ -19,13 +20,20 @@ app.use(function(res,res,next) {
 
 app.route('/api/:name').get((req, res,next) => {
   const requestedDevice = req.params['name'];
-  res.send({ name: requestedDevice });
+  var versionList = [];
+  shell.cd("/home/jason/Documents/backups");
+  versionList = shell.ls(`${requestedDevice}*`);
+  res.send(versionList);
   });
   
 app.route('/api/').post((req, res,next) => {
-  
+  var command;
+  if (req.body.version != null || req.body.version != "") {
+    command = new Ansible.Playbook().playbook(req.body.command)
+                                      .variables({ selectedHost: req.body.device, selectedVersion:req.body.version });
+  }
   //Create command
-  var command = new Ansible.Playbook().playbook(req.body.command)
+  command = new Ansible.Playbook().playbook(req.body.command)
                                       .variables({ selectedHost: req.body.device });
   
   //Set inventory

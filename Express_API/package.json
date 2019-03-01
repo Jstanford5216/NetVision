@@ -13,6 +13,7 @@
     "body-parser": "^1.18.3",
     "express": "^4.16.4",
     "node-ansible": "^0.5.5",
-    "rxjs": "^6.4.0"
+    "rxjs": "^6.4.0",
+    "shelljs": "^0.8.3"
   }
 }

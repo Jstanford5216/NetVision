@@ -19,7 +19,6 @@
   <div class="row">
     <label class="col-xs-6 pull-left">Select a device:</label>
     <label class="col-xs-6 ml-2 pull-left">Select a command:</label>
-    <span class="col-xs-8"></span>
   </div>
 
   <div class="row">
@@ -32,10 +31,15 @@
 
     <select class="col-xs-2 ml-2">
         <option *ngFor="let command of commands" (click)="setCommand(command.name)">
-          {{command.name}}
+          {{command.placeholder}}
         </option>
       </select>
-  <span class="col-xs-8"> </span>
+      
+      <select *ngIf=versionSelectBool class="col-xs-2 ml-2">
+        <option *ngFor="let version of versionsList" (click)="setVersion(version.name)">
+          {{version.placeholder}} 
+        </option>
+      </select>
 
   </div>
 
@@ -43,30 +47,8 @@
 
 </div>
 
-<div style="padding-top: 1%;" >
-  <svg viewBox="0 0 100 100">
-    <g stroke-width="0.5">
-      <rect x="0" y="0" width="60%" height="60%" stroke="black" fill="none" />
-      <circle cx="10%" cy="20%" r="6" stroke="black" fill="none" />
-      <text x="5%" y="20%" font-size="0.2em" fill="black">Router 1</text>
-    </g>
-    <g stroke-width="0.5">
-      <circle cx="30%" cy="20%" r="6" stroke="black" fill="none" />
-      <text x="25%" y="20%" font-size="0.2em" fill="black">Router 2</text>
-    </g>
-    <g stroke-width="0.5">
-        <rect x="15%" y="2%" width="10%" height="10%" stroke="black" fill="none" />
-        <text x="17%" y="8%" font-size="0.2em" fill="black">Esxi</text>
-        <rect x="36%" y="30%" width="10%" height="10%" stroke="black" fill="none" />
-        <text x="36%" y="35%" font-size="0.2em" fill="black">Switch 2</text>
-        <rect x="10%" y="32%" width="10%" height="10%" stroke="black" fill="none" />
-        <text x="10%" y="37%" font-size="0.2em" fill="black">Switch 1</text>
-    </g>
-    <g>
-      <line x1="25%" y1="12%" x2="27%" y2="15%" stroke="red" fill="red" stroke-width="0.5"/>
-      <line x1="15%" y1="12%" x2="13%" y2="15%" stroke="red" fill="red" stroke-width="0.5"/>
-      <line x1="33%" y1="25%" x2="36%" y2="30%" stroke="red" fill="red" stroke-width="0.5"/>
-      <line x1="10%" y1="26%" x2="10%" y2="32%" stroke="red" fill="red" stroke-width="0.5"/>
-    </g>
-  </svg>
-  </div>
+ <!--  <svg width="60%" height="1200" class="mySvg" (click)="clicked($event)">
+      <rect x="0" y="0" width="100%" height="100%" stroke="black" fill="none" />
+  </svg> -->
+
+  <svg width="800" height="600"></svg>

@@ -1,0 +1,22 @@
+{
+    "nodes": [
+      {"id": "Router 1", "group": 1},
+      {"id": "Router 2", "group": 2},
+      {"id": "Router 3", "group": 3},   
+      {"id": "Switch 1", "group": 1},   
+      {"id": "Switch 2", "group": 1},  
+      {"id": "Switch 3", "group": 1},   
+      {"id": "Switch 4", "group": 1}   
+    ],
+    "links": [
+      {"source": "Router 1", "target": "Router 2","label": "G1/0 to G1/0"},
+      {"source": "Router 1", "target": "Switch 1","label": "G1/0 to Fa0/0"},
+      {"source": "Router 1", "target": "Switch 2","label": "G1/0 to Fa0/0"},
+      {"source": "Switch 1", "target": "Switch 3","label": "G1/0 to Fa0/0"},
+      {"source": "Switch 1", "target": "Switch 3","label": "G1/0 to Fa0/2"},
+      {"source": "Switch 1", "target": "Switch 4"},
+      {"source": "Router 2", "target": "Router 3"},
+      {"source": "Router 3", "target": "Router 1"}
+    ]
+  }
+  

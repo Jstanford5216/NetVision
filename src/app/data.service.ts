@@ -14,8 +14,8 @@ export class DataService {
   runPlaybook(playbook: Playbook): Observable<Playbook> {
     return this.http.post<Playbook>('http://192.168.0.251:3000/api/', playbook);
   }
-
-  playBook($selected){
-    return this.runPlaybook($selected);
+  
+  getVersions(playbook: Playbook): Observable<object> {
+    return this.http.get('http://192.168.0.251:3000/api/' + playbook.device);
   }
 }
