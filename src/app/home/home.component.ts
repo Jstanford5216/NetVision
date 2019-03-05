@@ -67,6 +67,9 @@ export class HomeComponent implements OnInit {
       { placeholder: "Restore config", name: "restoreDevice" },
     ];
 
+    this.selected.device = "routers";
+    this.selected.command = "backupDevice";
+
     const svg = d3.select('svg');
     const width = +svg.attr('width');
     const height = +svg.attr('height');
@@ -237,10 +240,10 @@ export class HomeComponent implements OnInit {
             this.versionSelectBool = true;
           }
       });
-    }
 
-    if (this.versionsList.length == 0) {
-      console.log("couldn't retrieve version list.");
+      if (this.versionsList.length == 0) {
+        console.log("couldn't retrieve version list.");
+      }
     }
   }
 
