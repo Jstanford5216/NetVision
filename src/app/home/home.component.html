@@ -17,8 +17,9 @@
 <div class="container">
 
   <div class="row">
-    <label class="col-xs-6 pull-left">Select a device:</label>
-    <label class="col-xs-6 ml-2 pull-left">Select a command:</label>
+    <label class="col-xs-4 pull-left">Select a device:</label>
+    <label class="col-xs-4 ml-3 pull-left">Select a command:</label>
+    <label *ngIf=versionSelectBool class="col-xs-4 ml-3 pull-left">Select a backup version:</label>
   </div>
 
   <div class="row">
@@ -29,13 +30,13 @@
       </option>
     </select>
 
-    <select class="col-xs-2 ml-2">
+    <select class="col-xs-2 ml-3">
         <option *ngFor="let command of commands" (click)="setCommand(command.name)">
           {{command.placeholder}}
         </option>
       </select>
       
-      <select *ngIf=versionSelectBool class="col-xs-2 ml-2">
+      <select *ngIf=versionSelectBool class="col-xs-2 ml-4">
         <option *ngFor="let version of versionsList" (click)="setVersion(version.name)">
           {{version.placeholder}} 
         </option>

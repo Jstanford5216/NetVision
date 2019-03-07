@@ -12,7 +12,7 @@ app.listen(3000, () => {
 app.use(bodyParser.json());
 
 app.use(function(res,res,next) {
-  res.header("Access-Control-Allow-Origin","http://192.168.0.251");
+  res.header("Access-Control-Allow-Origin","http://10.0.0.1");
   res.header("Access-Control-Allow-Headers", "Content-Type, Accept");
   res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE");
   next();
@@ -32,10 +32,11 @@ app.route('/api/').post((req, res,next) => {
     command = new Ansible.Playbook().playbook(req.body.command)
                                       .variables({ selectedHost: req.body.device, selectedVersion:req.body.version });
   }
+  else{
   //Create command
   command = new Ansible.Playbook().playbook(req.body.command)
                                       .variables({ selectedHost: req.body.device });
-  
+  }
   //Set inventory
   command.inventory('hosts');
 

@@ -231,14 +231,20 @@ export class HomeComponent implements OnInit {
     this.selected.command = $command;
 
     if (this.selected.command === "restoreDevice") {
-      this.data.runPlaybook(this.selected).subscribe(data => {
-        for (var s in data) {
-            const version: Version = <Version>{ placeholder: s, name: s.split('$', 2)[1] };
+      this.data.getVersions(this.selected).subscribe(data => {
+        console.log(data);
+        for (let s in data) {
 
-            this.versionsList.push(version);
+          var formatName:string = data[s].split(`${this.selected.device}-`)[1];
+          
+          formatName = formatName.replace('.txt','');
+           
+          const version: Version = <Version>{ placeholder: formatName, name: data[s] };
 
-            this.versionSelectBool = true;
-          }
+          this.versionsList.push(version);
+
+          this.versionSelectBool = true;
+        }
       });
 
       if (this.versionsList.length == 0) {
