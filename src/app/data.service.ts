@@ -11,7 +11,7 @@ export class DataService {
 
   constructor(private http: HttpClient) { }
 
-  runPlaybook(playbook: Playbook): Observable<Playbook> {
+  runPlaybook(playbook: Playbook): Observable<any> {
     return this.http.post<Playbook>('http://10.0.0.4:3000/api/', playbook);
   }
   

@@ -24,8 +24,6 @@ interface Version {
   name: string;
 }
 
-const versions: Version[] = [];
-
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
@@ -225,32 +223,12 @@ export class HomeComponent implements OnInit {
 
   setDevice($device) {
     this.selected.device = $device;
+    this.versionSelectCheck();
   }
 
   setCommand($command) {
     this.selected.command = $command;
-
-    if (this.selected.command === "restoreDevice") {
-      this.data.getVersions(this.selected).subscribe(data => {
-        console.log(data);
-        for (let s in data) {
-
-          var formatName:string = data[s].split(`${this.selected.device}-`)[1];
-          
-          formatName = formatName.replace('.txt','');
-           
-          const version: Version = <Version>{ placeholder: formatName, name: data[s] };
-
-          this.versionsList.push(version);
-
-          this.versionSelectBool = true;
-        }
-      });
-
-      if (this.versionsList.length == 0) {
-        console.log("couldn't retrieve version list.");
-      }
-    }
+    this.versionSelectCheck();
   }
 
   setVersion($version) {
@@ -258,11 +236,44 @@ export class HomeComponent implements OnInit {
   }
 
   btnClick() {
-    /* this.h1Style = true;
-    console.log("clicked"); setting bool and logging to console */
-
     this.data.runPlaybook(this.selected).subscribe(data => {
       this.response = data;
+      console.log(data);
     });
+  }
+
+  versionSelectCheck(){
+    
+    this.versionsList = [];
+    this.versionSelectBool = false;
+
+    if (this.selected.command === "restoreDevice") {
+      this.data.getVersions(this.selected).subscribe(data => {
+        for (let s in data) {
+
+          var formatName: string = data[s].split(`${this.selected.device}-`)[1];
+
+          formatName = formatName.replace('.txt', '');
+
+          const version: Version = <Version>{ placeholder: formatName, name: data[s] };
+
+          this.versionsList.push(version);
+
+          this.versionSelectBool = true;
+
+        }
+        if (this.versionsList.length == 0) {
+          console.log("couldn't retrieve version list.");
+        }
+        else {
+          this.selected.version = this.versionsList[0].name;
+        }
+
+      });
+    }
+    else {
+      this.versionsList = [];
+      this.versionSelectBool = false;
+    }
   }
 }

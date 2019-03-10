@@ -30,7 +30,7 @@ app.route('/api/').post((req, res,next) => {
   var command;
   if (req.body.version != null || req.body.version != "") {
     command = new Ansible.Playbook().playbook(req.body.command)
-                                      .variables({ selectedHost: req.body.device, selectedVersion:req.body.version });
+                                      .variables({ selectedHost: req.body.device, selectedVersion: req.body.version });
   }
   else{
   //Create command
@@ -47,7 +47,10 @@ app.route('/api/').post((req, res,next) => {
   //Execute command
   var promise = command.exec({cwd:"/etc/ansible/playbooks"});
 
-  res.send(201, req.body);
+  promise.then(function(result)
+  {
+    res.send(201, `${result.code},${result.output}`);
+  });
 });
 
 app.route('/api/:name').put((req, res,next) => {
