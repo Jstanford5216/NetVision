@@ -31,25 +31,38 @@
     </select>
 
     <select class="col-xs-2 ml-3">
-        <option *ngFor="let command of commands" (click)="setCommand(command.name)">
-          {{command.placeholder}}
-        </option>
-      </select>
-      
-      <select *ngIf=versionSelectBool class="col-xs-2 ml-4">
-        <option *ngFor="let version of versionsList" (click)="setVersion(version.name)">
-          {{version.placeholder}} 
-        </option>
-      </select>
+      <option *ngFor="let command of commands" (click)="setCommand(command.name)">
+        {{command.placeholder}}
+      </option>
+    </select>
+
+    <select *ngIf=versionSelectBool class="col-xs-2 ml-4">
+      <option *ngFor="let version of versionsList" (click)="setVersion(version.name)">
+        {{version.placeholder}}
+      </option>
+    </select>
 
   </div>
 
- <button mat-button (click)="btnClick()">Run</button>
+  <button mat-button (click)="btnClick()">Run</button>
 
+  <div class="row">
+    <label class="col-xs-4 pull-left">Add a device(ip):</label>
+    <label class="col-xs-4 ml-3 pull-left"></label>
+    <label class="col-xs-4 ml-3 pull-left"></label>
+  </div>
+  <div class="row">
+    <input type="text" class="col-xs-4 pull-left" placeholder="192.168.0.1" (keyup)="setNewDevice($event.target.value)">
+    <label class="col-xs-4 ml-3 pull-left"></label>
+    <button mat-button (click)="addDevice()" class="col-xs-4 ml-3 pull-left">Add device</button>
+  </div>
+  <div class="row">
+      <ngb-alert *ngIf="NewDeviceInputError" type="danger" dismissible="">Must be a valid ip address</ngb-alert>
+  </div>
 </div>
 
- <!--  <svg width="60%" height="1200" class="mySvg" (click)="clicked($event)">
+<!--  <svg width="60%" height="1200" class="mySvg" (click)="clicked($event)">
       <rect x="0" y="0" width="100%" height="100%" stroke="black" fill="none" />
   </svg> -->
 
-  <svg width="800" height="600"></svg>
+<svg width="800" height="600"></svg>

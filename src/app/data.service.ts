@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Playbook } from './playbook';
+import { selectedData } from './selectedData';
 
 @Injectable({
   providedIn: 'root'
@@ -11,11 +11,15 @@ export class DataService {
 
   constructor(private http: HttpClient) { }
 
-  runPlaybook(playbook: Playbook): Observable<any> {
-    return this.http.post<Playbook>('http://10.0.0.4:3000/api/', playbook);
+  runPlaybook(data: selectedData): Observable<object> {
+    return this.http.post<selectedData>('http://10.0.0.4:3000/api/', data);
   }
   
-  getVersions(playbook: Playbook): Observable<object> {
-    return this.http.get('http://10.0.0.4:3000/api/' + playbook.device);
+  getVersions(data: selectedData): Observable<object> {
+    return this.http.get('http://10.0.0.4:3000/api/' + data.device);
+  }
+
+  getDevices(): Observable<object> {
+    return this.http.get('http://10.0.0.4:3000/api/' + 'devices');
   }
 }

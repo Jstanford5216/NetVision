@@ -1,4 +1,4 @@
-export class Playbook {
+export class selectedData{
     
     constructor() { }
 

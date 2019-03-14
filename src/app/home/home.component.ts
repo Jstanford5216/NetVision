@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { DataService } from '../data.service';
-import { Playbook } from '../playbook';
+import { selectedData } from '../selectedData';
 import * as d3 from 'd3';
 
 interface Node {
@@ -34,8 +34,10 @@ interface Version {
 
 export class HomeComponent implements OnInit {
 
-  response: Object;
+  //response: Object;
   //h1Style: boolean = false;
+
+  deviceCollection: any;
 
   devices: Object;
 
@@ -45,11 +47,24 @@ export class HomeComponent implements OnInit {
 
   versionSelectBool = false;
 
-  selected: Playbook = new Playbook();
+  NewDeviceInputError = false;
+
+  newDevice: string;
+
+  selected: selectedData = new selectedData();
 
   constructor(private data: DataService) { }
 
   ngOnInit() {
+
+    this.getDevicesInit();
+
+    const data = this.deviceCollection;
+
+    console.log(data);
+
+    //if (this.deviceCollection.nodes == {} || this.deviceCollection.links == {})
+/* 
     //When component loads
     this.devices = [
       { placeholder: "All routers", name: "routers" },
@@ -78,8 +93,6 @@ export class HomeComponent implements OnInit {
       .force("link", d3.forceLink().id((d: any) => d.id).distance(100).strength(1))
       .force('charge', d3.forceManyBody().strength(-2000))
       .force("center", d3.forceCenter(width / 2, height / 2));
-
-    d3.json('assets/collection.json').then(function (data: any) {
 
       const nodes: Node[] = [];
       const links: Link[] = [];
@@ -187,7 +200,7 @@ export class HomeComponent implements OnInit {
           }
         });
 
-      }
+      } */
 
       /*  function dragstarted(d) {
          if (!d3.event.active) { simulation.alphaTarget(0.3).restart(); }
@@ -206,7 +219,7 @@ export class HomeComponent implements OnInit {
          d.fy = null;
        } */
 
-    });
+    
   }
 
   /* clicked(event: any)
@@ -237,13 +250,18 @@ export class HomeComponent implements OnInit {
 
   btnClick() {
     this.data.runPlaybook(this.selected).subscribe(data => {
-      this.response = data;
+      if (data.toString() == '0') {
+        console.log("Playbook executed sucessfully");
+      }
+      else {
+        console.log("Trouble reaching router/s or switch/s");
+      }
       console.log(data);
     });
   }
 
-  versionSelectCheck(){
-    
+  versionSelectCheck() {
+
     this.versionsList = [];
     this.versionSelectBool = false;
 
@@ -275,5 +293,29 @@ export class HomeComponent implements OnInit {
       this.versionsList = [];
       this.versionSelectBool = false;
     }
+  }
+
+  setNewDevice($input: string) {
+    this.NewDeviceInputError = false;
+    let ipCheck = new RegExp("^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$");
+    if (ipCheck.test($input) == false) {
+      this.NewDeviceInputError = true;
+      this.newDevice = null;
+    }
+    else {
+      this.newDevice = $input;
+    }
+  }
+
+  getDevicesInit() {
+    this.data.getDevices().subscribe(data => {
+
+    this.deviceCollection = data;
+
+    });
+  }
+
+  addDevice() {
+
   }
 }
