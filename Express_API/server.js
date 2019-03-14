@@ -23,7 +23,8 @@ app.route('/api/:name').get((req, res, next) => {
   query = req.params['name'];
 
   if (query == "devices") {
-  res.send("/home/jason/Documents/collection.json")
+    var jsonObj = require("/home/jason/Documents/collection.json");
+    res.send(jsonObj);
   }
   else {
     const requestedDevice = req.params['name'];
