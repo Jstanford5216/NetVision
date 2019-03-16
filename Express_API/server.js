@@ -12,7 +12,7 @@ app.listen(3000, () => {
 app.use(bodyParser.json());
 
 app.use(function (res, res, next) {
-  res.header("Access-Control-Allow-Origin", "http://10.0.0.1");
+  res.header("Access-Control-Allow-Origin", "*"); //any for testing, ensure to change to one host only
   res.header("Access-Control-Allow-Headers", "Content-Type, Accept");
   res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE");
   next();
@@ -37,14 +37,20 @@ app.route('/api/:name').get((req, res, next) => {
 
 app.route('/api/').post((req, res, next) => {
   var command;
+  var deviceF = req.body.device;
+  if(deviceF == "All_Devices")
+  {
+    deviceF = "all";
+  }
+
   if (req.body.version != null || req.body.version != "") {
     command = new Ansible.Playbook().playbook(req.body.command)
-      .variables({ selectedHost: req.body.device, selectedVersion: req.body.version });
+      .variables({ selectedHost: deviceF, selectedVersion: req.body.version });
   }
   else {
     //Create command
     command = new Ansible.Playbook().playbook(req.body.command)
-      .variables({ selectedHost: req.body.device });
+      .variables({ selectedHost: deviceF });
   }
   //Set inventory
   command.inventory('hosts');

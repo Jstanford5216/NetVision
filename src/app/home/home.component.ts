@@ -39,9 +39,11 @@ export class HomeComponent implements OnInit {
 
   deviceCollection: any;
 
-  devices: Object;
+  devices: Object[] = [];
 
   commands: Object;
+
+  devicesInit: Object[] = [];
 
   versionsList: Version[] = [];
 
@@ -56,49 +58,40 @@ export class HomeComponent implements OnInit {
   constructor(private data: DataService) { }
 
   ngOnInit() {
+    this.data.getDevices().subscribe(data => {
 
-    this.getDevicesInit();
+      //When component loads
+      this.devices = [
+        "All_Devices",
+        "All_Switches" ,
+        "All_Routers" ,
+      ];
 
-    const data = this.deviceCollection;
+      this.commands = [
+        { placeholder: "Backup config", name: "backupDevice" },
+        { placeholder: "Restore config", name: "restoreDevice" },
+      ];
 
-    console.log(data);
+      this.selected.device = "all";
+      this.selected.command = "backupDevice";
 
-    //if (this.deviceCollection.nodes == {} || this.deviceCollection.links == {})
-/* 
-    //When component loads
-    this.devices = [
-      { placeholder: "All routers", name: "routers" },
-      { placeholder: "Router 1", name: "router01" },
-      { placeholder: "Router 2", name: "router02" },
-      { placeholder: "All switches", name: "switches" },
-      { placeholder: "Switch 1", name: "switch01" },
-      { placeholder: "Switch 2", name: "switch02" }
-    ];
+      const svg = d3.select('svg');
+      const width = +svg.attr('width');
+      const height = +svg.attr('height');
 
-    this.commands = [
-      { placeholder: "Backup config", name: "backupDevice" },
-      { placeholder: "Restore config", name: "restoreDevice" },
-    ];
+      const color = d3.scaleOrdinal(d3.schemeCategory10);
 
-    this.selected.device = "routers";
-    this.selected.command = "backupDevice";
-
-    const svg = d3.select('svg');
-    const width = +svg.attr('width');
-    const height = +svg.attr('height');
-
-    const color = d3.scaleOrdinal(d3.schemeCategory10);
-
-    const simulation = d3.forceSimulation()
-      .force("link", d3.forceLink().id((d: any) => d.id).distance(100).strength(1))
-      .force('charge', d3.forceManyBody().strength(-2000))
-      .force("center", d3.forceCenter(width / 2, height / 2));
+      const simulation = d3.forceSimulation()
+        .force("link", d3.forceLink().id((d: any) => d.id).distance(100).strength(1))
+        .force('charge', d3.forceManyBody().strength(-2000))
+        .force("center", d3.forceCenter(width / 2, height / 2));
 
       const nodes: Node[] = [];
       const links: Link[] = [];
 
       data.nodes.forEach((d) => {
         nodes.push(<Node>d);
+        this.devices.push(<Node>d.id)
       });
 
       data.links.forEach((d) => {
@@ -199,27 +192,30 @@ export class HomeComponent implements OnInit {
             return 'rotate(0)';
           }
         });
+      }
+    });
 
-      } */
 
-      /*  function dragstarted(d) {
-         if (!d3.event.active) { simulation.alphaTarget(0.3).restart(); }
-         d.fx = d.x;
-         d.fy = d.y;
-       }
+
+
+    /*  function dragstarted(d) {
+       if (!d3.event.active) { simulation.alphaTarget(0.3).restart(); }
+       d.fx = d.x;
+       d.fy = d.y;
+     }
  
-       function dragged(d) {
-         d.fx = d3.event.x;
-         d.fy = d3.event.y;
-       }
+     function dragged(d) {
+       d.fx = d3.event.x;
+       d.fy = d3.event.y;
+     }
  
-       function dragended(d) {
-         if (!d3.event.active) { simulation.alphaTarget(0); }
-         d.fx = null;
-         d.fy = null;
-       } */
+     function dragended(d) {
+       if (!d3.event.active) { simulation.alphaTarget(0); }
+       d.fx = null;
+       d.fy = null;
+     } */
 
-    
+
   }
 
   /* clicked(event: any)
@@ -305,14 +301,6 @@ export class HomeComponent implements OnInit {
     else {
       this.newDevice = $input;
     }
-  }
-
-  getDevicesInit() {
-    this.data.getDevices().subscribe(data => {
-
-    this.deviceCollection = data;
-
-    });
   }
 
   addDevice() {

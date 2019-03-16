@@ -25,8 +25,8 @@
   <div class="row">
 
     <select class="col-xs-2">
-      <option *ngFor="let device of devices" (click)="setDevice(device.name)">
-        {{device.placeholder}}
+      <option *ngFor="let device of devices" (click)="setDevice(device)">
+        {{device}}
       </option>
     </select>
 
