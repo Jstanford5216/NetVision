@@ -72,7 +72,7 @@ export class HomeComponent implements OnInit {
         { placeholder: "Restore config", name: "restoreDevice" },
       ];
 
-      this.selected.device = "all";
+      this.selected.device = "All_Devices";
       this.selected.command = "backupDevice";
 
       const svg = d3.select('svg');
@@ -247,7 +247,7 @@ export class HomeComponent implements OnInit {
   btnClick() {
     this.data.runPlaybook(this.selected).subscribe(data => {
       if (data.toString() == '0') {
-        console.log("Playbook executed sucessfully");
+        console.log("Inital gathering playbook executed sucessfully");
       }
       else {
         console.log("Trouble reaching router/s or switch/s");

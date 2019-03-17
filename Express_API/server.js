@@ -23,8 +23,25 @@ app.route('/api/:name').get((req, res, next) => {
   query = req.params['name'];
 
   if (query == "devices") {
-    var jsonObj = require("/home/jason/Documents/collection.json");
-    res.send(jsonObj);
+
+    var deviceList = [];
+
+    command = new Ansible.Playbook().playbook("getDeviceInfo");
+    //Set inventory
+    command.inventory('hosts');
+
+    //live results
+    command.on('stdout', function (data) { console.log(data.toString()); });
+    command.on('stderr', function (data) { console.log(data.toString()); });
+
+    //Execute command
+    var promise = command.exec({ cwd: "/etc/ansible/playbooks" });
+
+    promise.then(function(result){
+      deviceList = result;
+    });
+    /* var jsonObj = require("/home/jason/Documents/collection.json"); */
+    res.send(deviceList);
   }
   else {
     const requestedDevice = req.params['name'];
@@ -38,8 +55,7 @@ app.route('/api/:name').get((req, res, next) => {
 app.route('/api/').post((req, res, next) => {
   var command;
   var deviceF = req.body.device;
-  if(deviceF == "All_Devices")
-  {
+  if (deviceF == "All_Devices") {
     deviceF = "all";
   }
 
