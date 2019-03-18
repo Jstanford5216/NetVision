@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const Ansible = require('node-ansible');
 const shell = require('shelljs');
+const fs = require('fs');
 
 const app = express();
 
@@ -35,11 +36,17 @@ app.route('/api/:name').get((req, res, next) => {
     command.on('stderr', function (data) { console.log(data.toString()); });
 
     //Execute command
-    var promise = command.exec({ cwd: "/etc/ansible/playbooks" });
+    command.exec({ cwd: "/etc/ansible/playbooks" });
 
-    promise.then(function(result){
-      deviceList = result;
-    });
+    shell.cd("/home/jason/Documents/backups");
+    deviceFileList = shell.ls("*DeviceInfo*");
+    for (let f in deviceFileList)
+    {
+      fs.readFile(f,'utf8', function(err,contents) {
+        deviceList.push(contents);
+      });
+    }
+    
     /* var jsonObj = require("/home/jason/Documents/collection.json"); */
     res.send(deviceList);
   }

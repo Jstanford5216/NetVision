@@ -37,8 +37,6 @@ export class HomeComponent implements OnInit {
   //response: Object;
   //h1Style: boolean = false;
 
-  deviceCollection: any;
-
   devices: Object[] = [];
 
   commands: Object;
@@ -59,7 +57,7 @@ export class HomeComponent implements OnInit {
 
   ngOnInit() {
     this.data.getDevices().subscribe(data => {
-
+console.log(data);
       //When component loads
       this.devices = [
         "All_Devices",
