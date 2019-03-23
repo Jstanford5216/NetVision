@@ -1,4 +1,5 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation, OnDestroy } from '@angular/core';
+import { Subscription } from 'node_modules/rxjs';
 import { DataService } from '../data.service';
 import { selectedData } from '../selectedData';
 import * as d3 from 'd3';
@@ -53,11 +54,13 @@ export class HomeComponent implements OnInit {
 
   selected: selectedData = new selectedData();
 
+  subscription : Subscription;
+
   constructor(private data: DataService) { }
 
   ngOnInit() {
-    this.data.getDevices().subscribe(data => {
-console.log(data);
+    this.subscription = this.data.getDevices().subscribe(data => {
+      console.log(data);
       //When component loads
       this.devices = [
         "All_Devices",
@@ -193,9 +196,6 @@ console.log(data);
       }
     });
 
-
-
-
     /*  function dragstarted(d) {
        if (!d3.event.active) { simulation.alphaTarget(0.3).restart(); }
        d.fx = d.x;
@@ -214,6 +214,9 @@ console.log(data);
      } */
 
 
+  }
+  ngOnDestroy(){
+    this.subscription.unsubscribe();
   }
 
   /* clicked(event: any)

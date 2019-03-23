@@ -25,8 +25,6 @@ app.route('/api/:name').get((req, res, next) => {
 
   if (query == "devices") {
 
-    var deviceList = [];
-
     command = new Ansible.Playbook().playbook("getDeviceInfo");
     //Set inventory
     command.inventory('hosts');
@@ -38,17 +36,45 @@ app.route('/api/:name').get((req, res, next) => {
     //Execute command
     command.exec({ cwd: "/etc/ansible/playbooks" });
 
-    shell.cd("/home/jason/Documents/backups");
-    deviceFileList = shell.ls("*DeviceInfo*");
-    for (let f in deviceFileList)
-    {
-      fs.readFile(f,'utf8', function(err,contents) {
-        deviceList.push(contents);
+    function afterTimeout() {
+      command = new Ansible.Playbook().playbook("getDeviceInfo2");
+
+      command.inventory('hosts');
+
+
+      command.on('stdout', function (data) { console.log(data.toString()); });
+      command.on('stderr', function (data) { console.log(data.toString()); });
+
+
+      var promise = command.exec({ cwd: "/etc/ansible/playbooks" });
+
+      promise.then(function (result) {
+        const deviceList = [];
+        shell.cd("/home/jason/Documents/backups");
+        deviceFileList = shell.ls("*DeviceInfo*");
+
+        var i = -1;
+
+        deviceFileList.forEach(function (d) {
+          i = i + 1;
+          var contents = fs.readFileSync(`/home/jason/Documents/backups/${deviceFileList[i]}`, 'ascii').split('\n');
+          var j = -1;
+          contents.forEach(function (c) {
+            j = j + 1;
+            if (j >= 5) {
+              var filtered = contents[j].split('  ').filter(function (output) {
+                return output != "";
+              });
+              var finalOutput = { hostname: filtered[0], source: filtered[1], destination: filtered[5].trimLeft() }
+              deviceList.push(finalOutput);
+            }
+          });
+        });
+        res.send(deviceList);
+        /* var jsonObj = require("/home/jason/Documents/collection.json"); */
       });
     }
-    
-    /* var jsonObj = require("/home/jason/Documents/collection.json"); */
-    res.send(deviceList);
+    setTimeout(afterTimeout, 5000);
   }
   else {
     const requestedDevice = req.params['name'];
