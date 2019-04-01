@@ -19,7 +19,11 @@ export class DataService {
     return this.http.get('http://10.1.0.224:3000/api/' + data.device);
   }
 
-  getDevices(): Observable<any> {
-    return this.http.get('http://10.1.0.224:3000/api/' + 'devices');
+  getCachedDevices(): Observable<any> {
+    return this.http.get('http://10.1.0.224:3000/api/' + 'CachedDevices');
+  }
+
+  getNewDevices(): Observable<any> {
+    return this.http.get('http://10.1.0.224:3000/api/' + 'NewDevices');
   }
 }

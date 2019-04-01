@@ -22,8 +22,11 @@ app.use(function (res, res, next) {
 app.route('/api/:name').get((req, res, next) => {
 
   query = req.params['name'];
-
-  if (query == "devices") {
+  if (query == "CachedDevices"){
+    var jsonObj = JSON.parse(fs.readFileSync("/home/jason/Documents/collection.json"));
+    res.send(jsonObj);
+  }
+  else if (query == "NewDevices") {
 
     command = new Ansible.Playbook().playbook("getDeviceInfo");
     //Set inventory
@@ -49,32 +52,57 @@ app.route('/api/:name').get((req, res, next) => {
       var promise = command.exec({ cwd: "/etc/ansible/playbooks" });
 
       promise.then(function (result) {
-        const deviceList = [];
+
+        const nodes = [];
+        var links = [];
+
         shell.cd("/home/jason/Documents/backups");
         deviceFileList = shell.ls("*DeviceInfo*");
 
         var i = -1;
 
         deviceFileList.forEach(function (d) {
-          i = i + 1;
+          i++;
           var contents = fs.readFileSync(`/home/jason/Documents/backups/${deviceFileList[i]}`, 'ascii').split('\n');
           var j = -1;
+          var node = { id: contents[0].trimRight(), group: 1 };
+          nodes.push(node);
           contents.forEach(function (c) {
-            j = j + 1;
-            if (j >= 5) {
+            j++;
+            if (j >= 6) {
               var filtered = contents[j].split('  ').filter(function (output) {
                 return output != "";
               });
-              var finalOutput = { hostname: filtered[0], source: filtered[1], destination: filtered[5].trimLeft() }
-              deviceList.push(finalOutput);
+              var link = { source: contents[0].trimRight(), target: filtered[0].split('.')[0], label: `${filtered[1]} to ${filtered[5].trimLeft()}` };
+              links.push(link);
             }
           });
         });
-        res.send(deviceList);
-        /* var jsonObj = require("/home/jason/Documents/collection.json"); */
+        var k = -1;
+        links.forEach(function (l) {
+          k++;
+          links.forEach(function (o) {
+            var searchText = `${l.label.split("to")[1].trimLeft()} to ${l.label.split("to")[0].trimRight()}`;
+            if(l.source == o.target && searchText == o.label)
+            {
+               links.splice(k,1);
+            }
+          });
+        });
+        var deviceList = { nodes: nodes, links: links };
+        //store json in file
+        var jsonContent = JSON.stringify(deviceList);
+        fs.writeFile("/home/jason/Documents/collection.json", jsonContent, 'utf8', function (err) {
+          if (err) {
+            res.send({ text: "error occured" });
+          }
+        });
+        //clean up files
+        shell.rm("*DeviceInfo*");
+        res.send(201, result.code);
       });
     }
-    setTimeout(afterTimeout, 5000);
+    setTimeout(afterTimeout, 10000);
   }
   else {
     const requestedDevice = req.params['name'];

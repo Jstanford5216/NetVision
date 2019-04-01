@@ -48,35 +48,43 @@ export class HomeComponent implements OnInit {
 
   versionSelectBool = false;
 
+  loadingBool = false;
+
   NewDeviceInputError = false;
 
   newDevice: string;
 
   selected: selectedData = new selectedData();
 
-  subscription : Subscription;
+  subscription: Subscription;
 
   constructor(private data: DataService) { }
 
   ngOnInit() {
-    this.subscription = this.data.getDevices().subscribe(data => {
+    //When component loads
+    this.init2();
+  }
+
+  init2() {
+    this.subscription = this.data.getCachedDevices().subscribe(data => {
       console.log(data);
-      //When component loads
+      
       this.devices = [
         "All_Devices",
-        "All_Switches" ,
-        "All_Routers" ,
+        "All_Switches",
+        "All_Routers",
       ];
-
+  
       this.commands = [
         { placeholder: "Backup config", name: "backupDevice" },
         { placeholder: "Restore config", name: "restoreDevice" },
       ];
-
+  
       this.selected.device = "All_Devices";
       this.selected.command = "backupDevice";
-
-      const svg = d3.select('svg');
+      
+      var svg = d3.select('svg');
+      svg.selectAll("*").remove();
       const width = +svg.attr('width');
       const height = +svg.attr('height');
 
@@ -85,7 +93,7 @@ export class HomeComponent implements OnInit {
       const simulation = d3.forceSimulation()
         .force("link", d3.forceLink().id((d: any) => d.id).distance(100).strength(1))
         .force('charge', d3.forceManyBody().strength(-2000))
-        .force("center", d3.forceCenter(width / 2, height / 2));
+        .force("center", d3.forceCenter(width / 4, height / 2));
 
       const nodes: Node[] = [];
       const links: Link[] = [];
@@ -194,28 +202,25 @@ export class HomeComponent implements OnInit {
           }
         });
       }
+      /* function dragstarted(d) {
+        if (!d3.event.active) { simulation.alphaTarget(0.3).restart(); }
+        d.fx = d.x;
+        d.fy = d.y;
+      }
+
+      function dragged(d) {
+        d.fx = d3.event.x;
+        d.fy = d3.event.y;
+      }
+
+      function dragended(d) {
+        if (!d3.event.active) { simulation.alphaTarget(0); }
+        d.fx = null;
+        d.fy = null;
+      } */
     });
-
-    /*  function dragstarted(d) {
-       if (!d3.event.active) { simulation.alphaTarget(0.3).restart(); }
-       d.fx = d.x;
-       d.fy = d.y;
-     }
- 
-     function dragged(d) {
-       d.fx = d3.event.x;
-       d.fy = d3.event.y;
-     }
- 
-     function dragended(d) {
-       if (!d3.event.active) { simulation.alphaTarget(0); }
-       d.fx = null;
-       d.fy = null;
-     } */
-
-
   }
-  ngOnDestroy(){
+  ngOnDestroy() {
     this.subscription.unsubscribe();
   }
 
@@ -246,7 +251,7 @@ export class HomeComponent implements OnInit {
   }
 
   btnClick() {
-    this.data.runPlaybook(this.selected).subscribe(data => {
+    this.subscription = this.data.runPlaybook(this.selected).subscribe(data => {
       if (data.toString() == '0') {
         console.log("Inital gathering playbook executed sucessfully");
       }
@@ -263,7 +268,7 @@ export class HomeComponent implements OnInit {
     this.versionSelectBool = false;
 
     if (this.selected.command === "restoreDevice") {
-      this.data.getVersions(this.selected).subscribe(data => {
+      this.subscription = this.data.getVersions(this.selected).subscribe(data => {
         for (let s in data) {
 
           var formatName: string = data[s].split(`${this.selected.device}-`)[1];
@@ -306,5 +311,14 @@ export class HomeComponent implements OnInit {
 
   addDevice() {
 
+  }
+
+  refreshDevices() {
+    this.loadingBool = true;
+    this.subscription = this.data.getNewDevices().subscribe(data => {
+      console.log(data);
+      this.init2();
+      this.loadingBool = false;
+    });
   }
 }
