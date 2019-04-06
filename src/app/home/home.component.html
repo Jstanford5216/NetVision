@@ -19,7 +19,7 @@
     <label>Please wait..discovering devices..</label>
     </div>
     <div class="progress">
-      <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%"></div>
+      <div class="progress-bar progress-bar-striped progress-bar-animated" [ngClass]="" style="width: 100%"></div>
     </div>
   </div>
 <div class="container">
@@ -53,7 +53,7 @@
   </div>
 
   <button mat-button (click)="btnClick()">Run</button>
-  <button mat-button (click)="refreshDevices()" class="col-xs-4 ml-3 pull-left">Refresh Devices</button>
+  <button mat-button (click)="refreshDevices()">Refresh Devices</button>
 
   <!-- <div class="row">
     <label class="col-xs-4 pull-left">Add a device(ip):</label>
@@ -68,9 +68,6 @@
   <div class="row">
       <ngb-alert *ngIf="NewDeviceInputError" type="danger" dismissible="">Must be a valid ip address</ngb-alert>
   </div> -->
-  <div class="row">
-    
-  </div>
   <svg width="800" height="600"></svg>
 </div>
 

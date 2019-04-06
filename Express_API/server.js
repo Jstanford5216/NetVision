@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const Ansible = require('node-ansible');
 const shell = require('shelljs');
 const fs = require('fs');
+const cors = require('cors');
 
 const app = express();
 
@@ -12,14 +13,11 @@ app.listen(3000, () => {
 
 app.use(bodyParser.json());
 
-app.use(function (res, res, next) {
-  res.header("Access-Control-Allow-Origin", "*"); //any for testing, ensure to change to one host only
-  res.header("Access-Control-Allow-Headers", "Content-Type, Accept");
-  res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE");
-  next();
-});
+app.use(cors({
+  origin: '*'
+}));
 
-app.route('/api/:name').get((req, res, next) => {
+app.route('/api/:name').get((req, res) => {
 
   query = req.params['name'];
   if (query == "CachedDevices"){
@@ -144,10 +142,10 @@ app.route('/api/').post((req, res, next) => {
   });
 });
 
-app.route('/api/:name').put((req, res, next) => {
+app.route('/api/:name').put((req, res) => {
   res.send(200, req.body);
 });
 
-app.route('/api/:name').delete((req, res, next) => {
+app.route('/api/:name').delete((req, res) => {
   res.sendStatus(204);
 });
