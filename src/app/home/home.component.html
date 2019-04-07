@@ -32,19 +32,19 @@
 
   <div class="row">
 
-    <select class="col-xs-2">
+    <select class="col-xs-2" [disabled]="loadingBool">
       <option *ngFor="let device of devices" (click)="setDevice(device)">
         {{device}}
       </option>
     </select>
 
-    <select class="col-xs-2 ml-3">
+    <select class="col-xs-2 ml-3" [disabled]="loadingBool">
       <option *ngFor="let command of commands" (click)="setCommand(command.name)">
         {{command.placeholder}}
       </option>
     </select>
 
-    <select *ngIf=versionSelectBool class="col-xs-2 ml-4">
+    <select *ngIf=versionSelectBool class="col-xs-2 ml-4" [disabled]="loadingBool">
       <option *ngFor="let version of versionsList" (click)="setVersion(version.name)">
         {{version.placeholder}}
       </option>
@@ -52,8 +52,8 @@
 
   </div>
 
-  <button mat-button (click)="btnClick()">Run</button>
-  <button mat-button (click)="refreshDevices()">Refresh Devices</button>
+  <button mat-button (click)="btnClick()" [disabled]="loadingBool">Run</button>
+  <button mat-button (click)="refreshDevices()" [disabled]="loadingBool">Refresh Devices</button>
 
   <!-- <div class="row">
     <label class="col-xs-4 pull-left">Add a device(ip):</label>
