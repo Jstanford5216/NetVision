@@ -54,20 +54,8 @@
 
   <button mat-button (click)="btnClick()" [disabled]="loadingBool">Run</button>
   <button mat-button (click)="refreshDevices()" [disabled]="loadingBool">Refresh Devices</button>
+  <button mat-button (click)="toggleBackup()" [disabled]="loadingBool">Toggle auto-backup</button>
 
-  <!-- <div class="row">
-    <label class="col-xs-4 pull-left">Add a device(ip):</label>
-    <label class="col-xs-4 ml-3 pull-left"></label>
-    <label class="col-xs-4 ml-3 pull-left"></label>
-  </div>
-  <div class="row">
-    <input type="text" class="col-xs-4 pull-left" placeholder="192.168.0.1" (keyup)="setNewDevice($event.target.value)">
-    <label class="col-xs-4 ml-3 pull-left"></label>
-    <button mat-button (click)="addDevice()" class="col-xs-4 ml-3 pull-left">Add device</button>
-  </div>
-  <div class="row">
-      <ngb-alert *ngIf="NewDeviceInputError" type="danger" dismissible="">Must be a valid ip address</ngb-alert>
-  </div> -->
   <svg width="800" height="600"></svg>
 </div>
 

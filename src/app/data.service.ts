@@ -12,18 +12,22 @@ export class DataService {
   constructor(private http: HttpClient) { }
 
   runPlaybook(data: selectedData): Observable<object> {
-    return this.http.post<selectedData>('http://35.197.229.177:3000/api/', data);
+    return this.http.post<selectedData>('http://192.168.193.133:3000/api/', data);
   }
   
   getVersions(data: selectedData): Observable<object> {
-    return this.http.get('http://35.197.229.177:3000/api/' + data.device);
+    return this.http.get('http://192.168.193.133:3000/api/' + data.device);
   }
 
   getCachedDevices(): Observable<any> {
-    return this.http.get('http://35.197.229.177:3000/api/' + 'CachedDevices');
+    return this.http.get('http://192.168.193.133:3000/api/' + 'CachedDevices');
   }
 
   getNewDevices(): Observable<any> {
-    return this.http.get('http://35.197.229.177:3000/api/' + 'NewDevices');
+    return this.http.get('http://192.168.193.133:3000/api/' + 'NewDevices');
+  }
+  
+  toggleBackup(): Observable<any> {
+    return this.http.get('http://192.168.193.133:3000/api/' + 'toggleAutoBackup');
   }
 }

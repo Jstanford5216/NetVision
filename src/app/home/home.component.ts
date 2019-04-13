@@ -67,22 +67,22 @@ export class HomeComponent implements OnInit {
 
   init2() {
     this.subscription = this.data.getCachedDevices().subscribe(data => {
-      console.log(data);
-      
+
       this.devices = [
         "All_Devices",
         "All_Switches",
         "All_Routers",
       ];
-  
+
       this.commands = [
         { placeholder: "Backup config", name: "backupDevice" },
         { placeholder: "Restore config", name: "restoreDevice" },
+        { placeholder: "Remove unused interfaces", name: "unusedInterfaces" }
       ];
-  
+
       this.selected.device = "All_Devices";
       this.selected.command = "backupDevice";
-      
+
       var svg = d3.select('svg');
       svg.selectAll("*").remove();
       const width = +svg.attr('width');
@@ -251,6 +251,7 @@ export class HomeComponent implements OnInit {
   }
 
   btnClick() {
+    console.log(`bob ${this.selected.version}`);
     this.subscription = this.data.runPlaybook(this.selected).subscribe(data => {
       if (data.toString() == '0') {
         console.log("Inital gathering playbook executed sucessfully");
@@ -271,7 +272,7 @@ export class HomeComponent implements OnInit {
       this.subscription = this.data.getVersions(this.selected).subscribe(data => {
         for (let s in data) {
 
-          var formatName: string = data[s].split(`${this.selected.device}-`)[1];
+          var formatName: string = data[s].split(`${this.selected.device}~`)[1];
 
           formatName = formatName.replace('.txt', '');
 
@@ -297,28 +298,22 @@ export class HomeComponent implements OnInit {
     }
   }
 
-  setNewDevice($input: string) {
-    this.NewDeviceInputError = false;
-    let ipCheck = new RegExp("^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$");
-    if (ipCheck.test($input) == false) {
-      this.NewDeviceInputError = true;
-      this.newDevice = null;
-    }
-    else {
-      this.newDevice = $input;
-    }
-  }
-
-  addDevice() {
-
-  }
-
   refreshDevices() {
     this.loadingBool = true;
     this.subscription = this.data.getNewDevices().subscribe(data => {
-      console.log(data);
       this.init2();
       this.loadingBool = false;
+    });
+  }
+
+  toggleBackup() {
+    this.subscription = this.data.toggleBackup().subscribe(data => {
+      if (data != -1) {
+        console.log(data.text);
+      }
+      else {
+        console.log("unable to toggle auto-backup");
+      }
     });
   }
 }
