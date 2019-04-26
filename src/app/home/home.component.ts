@@ -292,6 +292,30 @@ export class HomeComponent implements OnInit {
 
       });
     }
+    else if (this.selected.command === "deleteDevice") {
+      this.subscription = this.data.getVersions(this.selected).subscribe(data => {
+        for (let s in data) {
+
+          var formatName: string = data[s].split(`${this.selected.device}~`)[1];
+
+          formatName = formatName.replace('.txt', '');
+
+          const version: Version = <Version>{ placeholder: formatName, name: data[s] };
+
+          this.versionsList.push(version);
+
+          this.versionSelectBool = true;
+
+        }
+        if (this.versionsList.length == 0) {
+          console.log("couldn't retrieve version list.");
+        }
+        else {
+          this.selected.version = this.versionsList[0].name;
+        }
+
+      });
+    }
     else {
       this.versionsList = [];
       this.versionSelectBool = false;

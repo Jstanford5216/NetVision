@@ -205,13 +205,13 @@ app.route('/api/').post((req, res) => {
   else if (req.body.version != null && req.body.version != "" && req.body.command == "deleteDevice"){
     shell.cd("/home/jason/Documents/backups");
     shell.rm(req.body.version);
-    if (sh.error() == null)
+    if (shell.error() == null)
     {
-      res.send("error occured");
+      res.send({text:"Error occured"});
     }
     else
     {
-      res.send("Backup removed successfully!");
+      res.send({text:"Backup removed successfully!"});
     }
   }
 
