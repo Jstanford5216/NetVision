@@ -77,7 +77,8 @@ export class HomeComponent implements OnInit {
       this.commands = [
         { placeholder: "Backup config", name: "backupDevice" },
         { placeholder: "Restore config", name: "restoreDevice" },
-        { placeholder: "Remove unused interfaces", name: "unusedInterfaces" }
+        { placeholder: "Delete config", name: "deleteDevice" },
+        { placeholder: "Shutdown unused interfaces", name: "unusedInterfaces" }
       ];
 
       this.selected.device = "All_Devices";
@@ -251,7 +252,6 @@ export class HomeComponent implements OnInit {
   }
 
   btnClick() {
-    console.log(`bob ${this.selected.version}`);
     this.subscription = this.data.runPlaybook(this.selected).subscribe(data => {
       if (data.toString() == '0') {
         console.log("Inital gathering playbook executed sucessfully");

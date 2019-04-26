@@ -8,7 +8,7 @@ const { fork } = require('child_process');
 
 const app = express();
 
-var forked = fork('autobackup.js');
+var forked = fork('/var/www/html/prco304-final-year-project-Jstanford5216/Express_API/autobackup.js');
 
 var autobackupOn = true;
 
@@ -40,7 +40,7 @@ app.route('/api/:name').get((req, res) => {
     else
     {
       autobackupOn = true;
-      forked = fork('autobackup.js')
+      forked = fork('/var/www/html/prco304-final-year-project-Jstanford5216/Express_API/autobackup.js');
       res.send({text:"Auto-backup enabled"});
     }
   }
@@ -200,6 +200,19 @@ app.route('/api/').post((req, res) => {
         }
       });
     });
+  }
+
+  else if (req.body.version != null && req.body.version != "" && req.body.command == "deleteDevice"){
+    shell.cd("/home/jason/Documents/backups");
+    shell.rm(req.body.version);
+    if (sh.error() == null)
+    {
+      res.send("error occured");
+    }
+    else
+    {
+      res.send("Backup removed successfully!");
+    }
   }
 
   else if (req.body.version != null || req.body.version != "") {
