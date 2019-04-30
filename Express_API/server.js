@@ -35,13 +35,15 @@ app.route('/api/:name').get((req, res) => {
     {
       autobackupOn = false;
       forked.kill('SIGINT');
-      res.send({text:"Auto-backup disabled"});
+      res.send({text:"Auto-backup is now disabled."});
+      console.log("Auto-backup is now disabled.");
     }
     else
     {
       autobackupOn = true;
       forked = fork('/var/www/html/prco304-final-year-project-Jstanford5216/Express_API/autobackup.js');
-      res.send({text:"Auto-backup enabled"});
+      res.send({text:"Auto-backup is now enabled."});
+      console.log("Auto-backup is now disabled.");
     }
   }
 
@@ -127,10 +129,10 @@ app.route('/api/:name').get((req, res) => {
           else {
             //clean up files
             shell.rm("*DeviceInfo*");
-            res.status(201).send(result.code.toString());
+            res.status(201).send({text:result.output});
           }
         });
-      });
+      },function(err){console.log(err);});
     }
     setTimeout(afterTimeout, 10000);
   }
@@ -211,7 +213,7 @@ app.route('/api/').post((req, res) => {
     }
     else
     {
-      res.send({text:"Backup removed successfully!"});
+      res.status(204).send({text:"Backup removed successfully!"});
     }
   }
 

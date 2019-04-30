@@ -12,19 +12,29 @@
   'font-size' : !h1Style ? '1em' : '4em'
 }">Home</h1> -->
 
+<div #alert *ngIf=showNotice [ngClass]="{
+  'successAlert':noticeSuccess,
+  'dangerAlert':!noticeSuccess
+}" role="alert">
+    <button type="button" class="close"  (click)="closeAlert()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+    <strong>Notice</strong> <p>{{ noticeMessage }}</p>
+  </div>
+
 <div *ngIf=loadingBool class="loadingDiv">
     <div style="text-align: center">
     <label>Please wait..discovering devices..</label>
     </div>
     <div class="progress">
-      <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%"></div>
+      <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
     </div>
-    <!--<div *ngIf=showResult [ngClass]="{
-      'alert alert-success':discoverSuccessfulBool,
-      'alert alert-danger':!discoverSuccessfulBool 
-    }">
-       Some text value with output message
-    </div>--> 
+    <br>
+    <div *ngIf=showResult [ngClass]="{
+      'successAlert':discoverSuccessfulBool,
+      'dangerAlert':!discoverSuccessfulBool 
+    }">"{{discoverResult}}"
+  </div>
   </div>
 <div class="container">
 
@@ -32,7 +42,7 @@
     <label class="col">Select a device:</label>
     <div class="w-100"></div>
     <div class="col">
-    <select class="text-center text-center" [disabled]="loadingBool">
+    <select [disabled]="loadingBool">
         <option *ngFor="let device of devices"  (click)="setDevice(device)">
           {{device}}
         </option>
@@ -42,7 +52,7 @@
     <label class="col">Select a command:</label>
     <div class="w-100"></div>
     <div class="col">
-    <select class="text-center" [disabled]="loadingBool">
+    <select [disabled]="loadingBool">
         <option *ngFor="let command of commands" (click)="setCommand(command.name)">
           {{command.placeholder}}
         </option>
@@ -52,7 +62,7 @@
     <label *ngIf=versionSelectBool class="col">Select a backup version:</label>
     <div class="w-100"></div>
     <div *ngIf=versionSelectBool class="col">
-      <select class="text-center" [disabled]="loadingBool">
+      <select [disabled]="loadingBool">
         <option *ngFor="let version of versionsList" (click)="setVersion(version.name)">
           {{version.placeholder}}
         </option>
@@ -62,13 +72,10 @@
 </div>
 <br>
 <div class="row">
-  <button mat-button mat-raised-button style="color: black; background-color: rgb(31, 119, 180);" (click)="btnClick()" class="col-xs-4 text-center" [disabled]="loadingBool">Run</button>
- <button mat-button mat-raised-button color="accent" (click)="refreshDevices()" class="col-xs-4 text-center" [disabled]="loadingBool">Refresh Devices</button>
- <button mat-button mat-raised-button color="warn" (click)="toggleBackup()" class="col-xs-4 text-center" [disabled]="loadingBool">Toggle auto-backup</button>
+  <button mat-button mat-raised-button style="color: white; background-color: rgb(31, 119, 180);" (click)="btnClick()" class="col-xs-4 text-center" [disabled]="loadingBool">Run</button>
+ <button mat-button mat-raised-button color="accent" style="color: white;" (click)="refreshDevices()" class="col-xs-4 text-center" [disabled]="loadingBool">Refresh Devices</button>
+ <button mat-button mat-raised-button color="warn" style="color: white;" (click)="toggleBackup()" class="col-xs-4 text-center" [disabled]="loadingBool">Toggle auto-backup</button>
 </div>
-
-  
-
   <svg width="800" height="600"></svg>
 </div>
 

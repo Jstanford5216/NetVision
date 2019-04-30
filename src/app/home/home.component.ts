@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewEncapsulation, OnDestroy } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { Subscription } from 'node_modules/rxjs';
 import { DataService } from '../data.service';
 import { selectedData } from '../selectedData';
@@ -25,6 +25,11 @@ interface Version {
   name: string;
 }
 
+interface OutputType {
+  name: string;
+  unreachable: boolean;
+}
+
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
@@ -34,9 +39,11 @@ interface Version {
 
 
 export class HomeComponent implements OnInit {
+  static noticeSuccess: boolean = false;
 
-  //response: Object;
-  //h1Style: boolean = false;
+  closeAlert() {
+    this.showNotice = false;
+  }
 
   devices: Object[] = [];
 
@@ -48,7 +55,17 @@ export class HomeComponent implements OnInit {
 
   versionSelectBool = false;
 
+  showNotice = false;
+
+  noticeMessage = "";
+
   loadingBool = false;
+
+  discoverResult = "";
+
+  showResult = false;
+
+  discoverSuccessfulBool = false;
 
   NewDeviceInputError = false;
 
@@ -71,7 +88,7 @@ export class HomeComponent implements OnInit {
       this.devices = [
         "All_Devices",
         "All_Switches",
-        "All_Routers",
+        "All_Routers"
       ];
 
       this.commands = [
@@ -253,13 +270,7 @@ export class HomeComponent implements OnInit {
 
   btnClick() {
     this.subscription = this.data.runPlaybook(this.selected).subscribe(data => {
-      if (data.toString() == '0') {
-        console.log("Inital gathering playbook executed sucessfully");
-      }
-      else {
-        console.log("Trouble reaching router/s or switch/s");
-      }
-      console.log(data);
+      this.proccessResult(data);
     });
   }
 
@@ -284,12 +295,14 @@ export class HomeComponent implements OnInit {
 
         }
         if (this.versionsList.length == 0) {
-          console.log("couldn't retrieve version list.");
+          this.noticeMessage = "Could not find any backups for the selected device. Please select a different device and try again.";
+          HomeComponent.noticeSuccess = false;
+          this.showNotice = true;
         }
         else {
+          HomeComponent.noticeSuccess = false;
           this.selected.version = this.versionsList[0].name;
         }
-
       });
     }
     else if (this.selected.command === "deleteDevice") {
@@ -308,12 +321,14 @@ export class HomeComponent implements OnInit {
 
         }
         if (this.versionsList.length == 0) {
-          console.log("couldn't retrieve version list.");
+          this.noticeMessage = "Could not find any backups for the selected device. Please select a different device and try again.";
+          HomeComponent.noticeSuccess = false;
+          this.showNotice = true;
         }
         else {
+          HomeComponent.noticeSuccess = false;
           this.selected.version = this.versionsList[0].name;
         }
-
       });
     }
     else {
@@ -322,21 +337,135 @@ export class HomeComponent implements OnInit {
     }
   }
 
+  proccessResult(data) {
+
+    var devicesFailed = "";
+    var isError: boolean = true;
+
+    var proccessArray = data.text.split('TASK [debug] *******************************************************************')[1].split('\n');
+
+    proccessArray.forEach(function (p) {
+
+      var seperate = p.split(':');
+
+      if (seperate[0] == "fatal") {
+        var hostname = seperate[1].split(']')[0].replace('[', '');
+        if (devicesFailed == "") {
+          devicesFailed = devicesFailed + hostname
+        }
+        else {
+          devicesFailed = devicesFailed + ',' + hostname;
+        }
+      }
+
+    });
+
+    console.log(proccessArray);
+
+    if (devicesFailed != "") {
+      this.noticeMessage = `There was trouble gathering information for ${devicesFailed}. Please fix this before continuing.`
+      this.showNotice = true;
+    }
+
+    else {
+      HomeComponent.noticeSuccess = true;
+      isError = false;
+    }
+    return isError;
+
+    /* var extractResult: string = data.text.split("PLAY RECAP")[1];
+    var proccessArray = extractResult.split('\n');
+    proccessArray.shift();
+    proccessArray.pop();
+    proccessArray.pop();
+    var finalOutput: OutputType[] = [];
+    proccessArray.forEach(function (s) {
+      var filtered = s.split('    ').filter(function (output) {
+        return output != "";
+      });
+      var name = filtered[0];
+      var ok = Number(filtered[1].split('=')[1]);
+      var changed = Number(filtered[2].split('=')[1]);
+      var unreachable = Number(filtered[3].split('=')[1]);
+      var failed = Number((filtered[4].split('=')[1]).trim());
+
+      finalOutput.push(<OutputType>{ name, unreachable, failed });
+    });
+    finalOutput.forEach(function (f) {
+      if (f.failed > 0 && f.unreachable == 0) {
+        HomeComponent.noticeSuccess = false;
+        devicesFailed = devicesFailed + ',' + f.name;
+      }
+      else if (f.unreachable > 0 && f.failed == 0) {
+        HomeComponent.noticeSuccess = false;
+        devicesUnreachable = devicesUnreachable + ',' + f.name;
+      }
+      else if (f.unreachable > 0 && f.failed > 0) {
+        HomeComponent.noticeSuccess = false;
+        devicesUnreachable = devicesUnreachable + ',' + f.name;
+        devicesFailed = devicesFailed + ',' + f.name;
+      }
+      else if (f.unreachable == 0 && f.failed == 0) {
+        HomeComponent.noticeSuccess = true;
+        isError = false;
+      }
+    });
+    if (isError == true) {
+      if (devicesUnreachable == "") {
+        this.noticeMessage = `There was an internal error on ${devicesFailed} while running this command. Please fix this before continuing.`
+        this.showNotice = true;
+      }
+      else if (devicesFailed == "") {
+        this.noticeMessage = `There was trouble connecting to ${devicesUnreachable} while running this command. Please fix this before continuing.`
+        this.showNotice = true;
+      }
+      else {
+        this.noticeMessage = `There was an internal error on ${devicesFailed} and trouble connecting to ${devicesUnreachable} while running this command. Please fix these issues before continuing.`
+        this.showNotice = true;
+      }
+    }
+    return isError; */
+  }
+
   refreshDevices() {
+
     this.loadingBool = true;
+
     this.subscription = this.data.getNewDevices().subscribe(data => {
+      var isError = this.proccessResult(data);
       this.init2();
-      this.loadingBool = false;
+      if (isError == false) {
+        this.discoverResult = "Successfully retreived devices";
+        this.discoverSuccessfulBool = true;
+        this.showResult = true;
+      }
+      else {
+        this.discoverResult = "Device retrieval unsuccessful";
+        this.discoverSuccessfulBool = false;
+        this.showResult = true;
+      }
+
+      setTimeout(() => {
+        this.loadingBool = false;
+        this.showResult = false;
+        this.discoverSuccessfulBool = false;
+        this.discoverResult = "";
+      }, 10000);
+
     });
   }
 
   toggleBackup() {
     this.subscription = this.data.toggleBackup().subscribe(data => {
       if (data != -1) {
-        console.log(data.text);
+        this.noticeMessage = data.text;
+        HomeComponent.noticeSuccess = true;
+        this.showNotice = true;
       }
       else {
-        console.log("unable to toggle auto-backup");
+        this.noticeMessage = "There was an error toggling auto-backup. Please try again.";
+        HomeComponent.noticeSuccess = false;
+        this.showNotice = true;
       }
     });
   }
