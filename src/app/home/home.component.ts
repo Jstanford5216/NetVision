@@ -3,6 +3,7 @@ import { Subscription } from 'node_modules/rxjs';
 import { DataService } from '../data.service';
 import { selectedData } from '../selectedData';
 import * as d3 from 'd3';
+import { AngularMultiSelect } from 'angular2-multiselect-dropdown';
 
 interface Node {
   id: string;
@@ -53,7 +54,11 @@ export class HomeComponent implements OnInit {
 
   versionsList: Version[] = [];
 
+  settings = {};
+
   versionSelectBool = false;
+
+  versionRestoreSelectBool = false;
 
   showNotice = false;
 
@@ -97,6 +102,12 @@ export class HomeComponent implements OnInit {
         { placeholder: "Delete config", name: "deleteDevice" },
         { placeholder: "Shutdown unused interfaces", name: "unusedInterfaces" }
       ];
+
+      this.settings = {
+        enableSearchFilter: true,
+        labelKey: 'placeholder',
+        primaryKey: 'name'
+      };
 
       this.selected.device = "All_Devices";
       this.selected.command = "backupDevice";
@@ -236,6 +247,10 @@ export class HomeComponent implements OnInit {
         d.fx = null;
         d.fy = null;
       } */
+    }, err => {
+      this.noticeMessage = "There was trouble connecting to the server. Please try again.";
+      HomeComponent.noticeSuccess = false;
+      this.showNotice = true;
     });
   }
   ngOnDestroy() {
@@ -264,20 +279,43 @@ export class HomeComponent implements OnInit {
     this.versionSelectCheck();
   }
 
-  setVersion($version) {
-    this.selected.version = $version;
-  }
-
   btnClick() {
-    this.subscription = this.data.runPlaybook(this.selected).subscribe(data => {
-      this.proccessResult(data);
-    });
+    if (this.selected.command == "deleteDevice") {
+
+      this.subscription = this.data.runPlaybook(this.selected).subscribe(data => {
+        console.log(data);
+        if (data != null) {
+          this.noticeMessage = data.toString();
+          HomeComponent.noticeSuccess = true;
+          this.showNotice = true;
+        }
+        else {
+          this.noticeMessage = "There was trouble removing your backup/s. Please contact your manager.";
+          HomeComponent.noticeSuccess = false;
+          this.showNotice = true;
+        }
+      },
+        err => {
+          this.noticeMessage = "There was trouble connecting to the server. Please try again.";
+          HomeComponent.noticeSuccess = false;
+          this.showNotice = true;
+        });
+    }
+    else {
+      this.subscription = this.data.runPlaybook(this.selected).subscribe(data => {
+        this.proccessResult(data);
+      },
+        err => {
+          this.noticeMessage = "There was trouble connecting to the server. Please try again.";
+          HomeComponent.noticeSuccess = false;
+          this.showNotice = true;
+        });
+    }
   }
 
   versionSelectCheck() {
 
     this.versionsList = [];
-    this.versionSelectBool = false;
 
     if (this.selected.command === "restoreDevice") {
       this.subscription = this.data.getVersions(this.selected).subscribe(data => {
@@ -291,9 +329,10 @@ export class HomeComponent implements OnInit {
 
           this.versionsList.push(version);
 
-          this.versionSelectBool = true;
+          this.versionRestoreSelectBool = true;
 
         }
+
         if (this.versionsList.length == 0) {
           this.noticeMessage = "Could not find any backups for the selected device. Please select a different device and try again.";
           HomeComponent.noticeSuccess = false;
@@ -301,9 +340,14 @@ export class HomeComponent implements OnInit {
         }
         else {
           HomeComponent.noticeSuccess = false;
-          this.selected.version = this.versionsList[0].name;
+          this.selected.version.push(this.versionsList[0].name);
         }
-      });
+      },
+        err => {
+          this.noticeMessage = "There was trouble connecting to the server. Please try again.";
+          HomeComponent.noticeSuccess = false;
+          this.showNotice = true;
+        });
     }
     else if (this.selected.command === "deleteDevice") {
       this.subscription = this.data.getVersions(this.selected).subscribe(data => {
@@ -318,8 +362,12 @@ export class HomeComponent implements OnInit {
           this.versionsList.push(version);
 
           this.versionSelectBool = true;
+          this.versionRestoreSelectBool = false;
 
         }
+
+        AngularMultiSelect.prototype.selectedItems = [];
+
         if (this.versionsList.length == 0) {
           this.noticeMessage = "Could not find any backups for the selected device. Please select a different device and try again.";
           HomeComponent.noticeSuccess = false;
@@ -327,9 +375,14 @@ export class HomeComponent implements OnInit {
         }
         else {
           HomeComponent.noticeSuccess = false;
-          this.selected.version = this.versionsList[0].name;
+          this.selected.version.push(this.versionsList[0].name);
         }
-      });
+      },
+        err => {
+          this.noticeMessage = "There was trouble connecting to the server. Please try again.";
+          HomeComponent.noticeSuccess = false;
+          this.showNotice = true;
+        });
     }
     else {
       this.versionsList = [];
@@ -360,8 +413,6 @@ export class HomeComponent implements OnInit {
 
     });
 
-    console.log(proccessArray);
-
     if (devicesFailed != "") {
       this.noticeMessage = `There was trouble gathering information for ${devicesFailed}. Please fix this before continuing.`
       this.showNotice = true;
@@ -372,59 +423,6 @@ export class HomeComponent implements OnInit {
       isError = false;
     }
     return isError;
-
-    /* var extractResult: string = data.text.split("PLAY RECAP")[1];
-    var proccessArray = extractResult.split('\n');
-    proccessArray.shift();
-    proccessArray.pop();
-    proccessArray.pop();
-    var finalOutput: OutputType[] = [];
-    proccessArray.forEach(function (s) {
-      var filtered = s.split('    ').filter(function (output) {
-        return output != "";
-      });
-      var name = filtered[0];
-      var ok = Number(filtered[1].split('=')[1]);
-      var changed = Number(filtered[2].split('=')[1]);
-      var unreachable = Number(filtered[3].split('=')[1]);
-      var failed = Number((filtered[4].split('=')[1]).trim());
-
-      finalOutput.push(<OutputType>{ name, unreachable, failed });
-    });
-    finalOutput.forEach(function (f) {
-      if (f.failed > 0 && f.unreachable == 0) {
-        HomeComponent.noticeSuccess = false;
-        devicesFailed = devicesFailed + ',' + f.name;
-      }
-      else if (f.unreachable > 0 && f.failed == 0) {
-        HomeComponent.noticeSuccess = false;
-        devicesUnreachable = devicesUnreachable + ',' + f.name;
-      }
-      else if (f.unreachable > 0 && f.failed > 0) {
-        HomeComponent.noticeSuccess = false;
-        devicesUnreachable = devicesUnreachable + ',' + f.name;
-        devicesFailed = devicesFailed + ',' + f.name;
-      }
-      else if (f.unreachable == 0 && f.failed == 0) {
-        HomeComponent.noticeSuccess = true;
-        isError = false;
-      }
-    });
-    if (isError == true) {
-      if (devicesUnreachable == "") {
-        this.noticeMessage = `There was an internal error on ${devicesFailed} while running this command. Please fix this before continuing.`
-        this.showNotice = true;
-      }
-      else if (devicesFailed == "") {
-        this.noticeMessage = `There was trouble connecting to ${devicesUnreachable} while running this command. Please fix this before continuing.`
-        this.showNotice = true;
-      }
-      else {
-        this.noticeMessage = `There was an internal error on ${devicesFailed} and trouble connecting to ${devicesUnreachable} while running this command. Please fix these issues before continuing.`
-        this.showNotice = true;
-      }
-    }
-    return isError; */
   }
 
   refreshDevices() {
@@ -452,7 +450,12 @@ export class HomeComponent implements OnInit {
         this.discoverResult = "";
       }, 10000);
 
-    });
+    },
+      err => {
+        this.noticeMessage = "There was trouble connecting to the server. Please try again.";
+        HomeComponent.noticeSuccess = false;
+        this.showNotice = true;
+      });
   }
 
   toggleBackup() {
@@ -467,6 +470,38 @@ export class HomeComponent implements OnInit {
         HomeComponent.noticeSuccess = false;
         this.showNotice = true;
       }
-    });
+    },
+      err => {
+        this.noticeMessage = "There was trouble connecting to the server. Please try again.";
+        HomeComponent.noticeSuccess = false;
+        this.showNotice = true;
+      });
   }
+  onItemSelect(item: any) {
+    this.selected.version = AngularMultiSelect.prototype.selectedItems;
+    console.log(AngularMultiSelect.prototype.selectedItems);
+  }
+  onItemDeSelect(item: any) {
+    this.selected.version = AngularMultiSelect.prototype.selectedItems;
+  }
+
+  onSelectAll(items: any) {
+    this.selected.version = AngularMultiSelect.prototype.selectedItems;
+  }
+  onDeSelectAll(items: any) {
+    this.selected.version = AngularMultiSelect.prototype.selectedItems;
+  }
+  onFilterSelectAll() {
+    this.selected.version = AngularMultiSelect.prototype.selectedItems;
+  }
+  onFilterDeSelectAll() {
+    this.selected.version = AngularMultiSelect.prototype.selectedItems;
+  }
+
+  setRestoreVersion(version){
+    var tempArray = []
+    tempArray.push(version);
+    this.selected.version = tempArray;
+  }
+
 }

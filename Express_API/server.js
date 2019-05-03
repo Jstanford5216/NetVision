@@ -13,7 +13,7 @@ var forked = fork('/var/www/html/prco304-final-year-project-Jstanford5216/Expres
 var autobackupOn = true;
 
 forked.on('message', (msg) => {
-    console.log(msg);
+  console.log(msg);
 });
 
 app.listen(3000, () => {
@@ -31,18 +31,16 @@ app.route('/api/:name').get((req, res) => {
   query = req.params['name'];
 
   if (query == "toggleAutoBackup") {
-    if(autobackupOn == true)
-    {
+    if (autobackupOn == true) {
       autobackupOn = false;
       forked.kill('SIGINT');
-      res.send({text:"Auto-backup is now disabled."});
+      res.send({ text: "Auto-backup is now disabled." });
       console.log("Auto-backup is now disabled.");
     }
-    else
-    {
+    else {
       autobackupOn = true;
       forked = fork('/var/www/html/prco304-final-year-project-Jstanford5216/Express_API/autobackup.js');
-      res.send({text:"Auto-backup is now enabled."});
+      res.send({ text: "Auto-backup is now enabled." });
       console.log("Auto-backup is now disabled.");
     }
   }
@@ -129,10 +127,10 @@ app.route('/api/:name').get((req, res) => {
           else {
             //clean up files
             shell.rm("*DeviceInfo*");
-            res.status(201).send({text:result.output});
+            res.status(201).send({ text: result.output });
           }
         });
-      },function(err){console.log(err);});
+      }, function (err) { console.log(err); });
     }
     setTimeout(afterTimeout, 10000);
   }
@@ -204,22 +202,29 @@ app.route('/api/').post((req, res) => {
     });
   }
 
-  else if (req.body.version != null && req.body.version != "" && req.body.command == "deleteDevice"){
-    shell.cd("/home/jason/Documents/backups");
-    shell.rm(req.body.version);
-    if (shell.error() == null)
-    {
-      res.send({text:"Error occured"});
+  else if (req.body.version != null && req.body.version != "" && req.body.command == "deleteDevice") {
+    var errorOccured = false;
+
+  shell.cd("/home/jason/Documents/backups");
+
+  req.body.version.forEach(b => {
+    shell.rm(b.name);
+    if (shell.error() != null) {
+      errorOccured = true;
     }
-    else
-    {
-      res.status(204).send({text:"Backup removed successfully!"});
-    }
+  });
+  if (errorOccured == true) {
+    res.status(500).send();
+  }
+  else {
+    res.status(204).send("Backup/s removed successfully!");
+  }
+
   }
 
   else if (req.body.version != null || req.body.version != "") {
     command = new Ansible.Playbook().playbook(req.body.command)
-      .variables({ selectedHost: deviceF, selectedVersion: req.body.version });
+      .variables({ selectedHost: deviceF, selectedVersion: req.body.version[0] });
 
     //Set inventory
     command.inventory('hosts');
@@ -258,5 +263,5 @@ app.route('/api/').post((req, res) => {
 });
 
 app.route('/api/:name').delete((req, res) => {
-  res.sendStatus(204);
+  
 });

@@ -4,6 +4,6 @@ export class selectedData{
 
     device: string;
     command: string;
-    version: string;
+    version: any[] = [];
 }
 
