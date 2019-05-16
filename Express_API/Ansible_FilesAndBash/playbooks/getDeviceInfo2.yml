@@ -1,0 +1,28 @@
+---
+- hosts: all
+  gather_facts: true
+  ignore_errors: yes
+
+  tasks:
+  - name: gather device info
+    ios_facts:
+      gather_subset:
+        - config
+
+  - name: show neighbors 
+    ios_command:
+      commands:
+        - show cdp neighbors		 
+    register: output
+
+  - name: save output to local directory 
+    copy: 
+      content: "{{ ansible_net_hostname }} \n {{ output.stdout[0] }}"
+      dest: "/home/jason/Documents/backups/{{ ansible_net_hostname }}-DeviceInfo.txt"
+
+  - name: disable cdp
+    ios_config:
+      commands:	
+        - no cdp run
+  - debug: "{{ansible_play_batch}}"
+ 

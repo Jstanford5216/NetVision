@@ -1,0 +1,12 @@
+---
+- hosts: all
+  gather_facts: false
+  ignore_errors: yes
+
+  tasks:
+  - name: enable cdp
+    ios_config:
+      commands:	
+        - cdp run
+        - cdp timer 5
+  

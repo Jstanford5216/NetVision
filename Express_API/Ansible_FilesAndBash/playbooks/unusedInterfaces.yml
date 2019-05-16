@@ -1,0 +1,21 @@
+---
+- hosts: "{{ selectedHost }}"
+  gather_facts: true
+  ignore_errors: yes
+
+  tasks:
+  - name: gather device info
+    ios_facts:
+      gather_subset:
+        - config
+
+  - name: check interfaces 
+    ios_command:
+      commands:
+        - show int | inc Ether|Last input never
+    register: output
+
+  - name: save output to local directory 
+    copy: 
+      content: "{{ ansible_net_hostname }} \n {{ output.stdout[0] }}"
+      dest: "/home/jason/Documents/backups/{{ ansible_net_hostname }}-UnusedInterfaces.txt"

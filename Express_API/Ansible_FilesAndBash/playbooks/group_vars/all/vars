@@ -1,0 +1,8 @@
+---
+ansible_connection: network_cli
+ansible_become: yes
+ansible_become_method: enable
+ansible_network_os: ios
+ansible_user: jason
+ansible_ssh_pass: "{{ vault_ansible_ssh_pass }}"
+ansible_become_pass: "{{ vault_ansible_become_pass }}"

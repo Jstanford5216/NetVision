@@ -1,0 +1,14 @@
+---
+- hosts: "{{ selectedHost }}"
+  gather_facts: false
+  
+  tasks:
+    - name: copy backup to device
+      net_put:
+        src: /home/jason/Documents/backups/{{ selectedVersion }}        
+        dest: disk0:/{{selectedHost}}.config
+
+    - name: overwrite current config with backup
+      ios_command:
+        commands:
+          - config replace disk0:/{{ selectedHost }}.config force

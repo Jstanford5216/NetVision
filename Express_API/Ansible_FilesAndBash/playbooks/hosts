@@ -1,0 +1,22 @@
+# Ex 1: Ungrouped hosts, specify before any group headers.
+
+## green.example.com
+## blue.example.com
+## 192.168.100.1
+## 192.168.100.10
+
+# Ex 2: A collection of hosts belonging to the 'routers' group
+
+[all]
+    
+[All_Routers]
+R1 ansible_host=10.1.0.2 
+R2 ansible_host=10.2.0.2 
+R3 ansible_host=10.4.0.2 
+
+#Ex 3: A collection of hosts belonging to the 'switches' group
+[All_Switches]
+
+SW1 ansible_host=10.5.0.3
+SW2 ansible_host=10.6.0.3
+SW3 ansible_host=10.3.0.3

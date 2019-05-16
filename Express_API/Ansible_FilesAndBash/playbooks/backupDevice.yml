@@ -1,0 +1,24 @@
+---
+- hosts: "{{ selectedHost }}"
+  gather_facts: true
+  ignore_errors: yes
+
+  tasks:
+   - name: gather device info
+     ios_facts:
+       gather_subset:
+         - config
+
+   - name: show run 
+     ios_command:
+       commands:
+         - show run		 
+     register: config
+
+   - name: get datetime
+     set_fact: timestamp="{{lookup('pipe','date \"+%d-%m-%Y %H:%M\"')}}"
+
+   - name: save output to local directory 
+     copy: 
+       content: "{{ config.stdout[0] }}"
+       dest: "/home/jason/Documents/backups/{{ ansible_net_hostname }}~{{ timestamp }}.txt"

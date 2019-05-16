@@ -1,0 +1,14 @@
+---
+- hosts: "{{ selectedHost }}"
+  gather_facts: false
+  ignore_errors: yes
+
+  tasks:
+
+  - name: shutdown unused interfaces
+    ios_command:
+      commands:
+        - conf t
+        - "int {{ item }}"
+        - shutdown
+    with_items: "{{ unusedList }}"
