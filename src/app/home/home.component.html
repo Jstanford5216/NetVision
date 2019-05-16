@@ -3,24 +3,29 @@
   'dangerAlert':!noticeSuccess
 }" role="alert">
   <button type="button" class="close" (click)="closeAlert()">
+    <!--Bootstrap alert box changes status class based on bool state-->
     <span aria-hidden="true">&times;</span>
   </button>
   <strong>Notice</strong>
   <p>{{ noticeMessage }}</p>
+  <!--Insert any messages from source that activated the alertbox-->
 </div>
 
 <div *ngIf=loadingBool class="loadingDiv">
+  <!--Loading display div based on bool state-->
   <div style="text-align: center">
     <label>Please wait..discovering devices..</label>
   </div>
   <div class="progress">
     <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
+    <!--Display animated loading bar at 100%-->
   </div>
   <br>
   <div *ngIf=showResult [ngClass]="{
       'successAlert':discoverSuccessfulBool,
       'dangerAlert':!discoverSuccessfulBool 
     }">"{{discoverResult}}"
+    <!--Box that displays upon completion of refreshed devices -->
   </div>
 </div>
 <div class="container">
@@ -31,49 +36,58 @@
     <div class="col">
       <select [disabled]="loadingBool">
         <option *ngFor="let device of devices" (click)="setDevice(device)">
+          <!--Dropdown for selecting a device using list of devices from component, disabled tag trigger when loading-->
           {{device}}
+          <!--Loop for populating select list with options, on click this will update selected value-->
         </option>
       </select>
     </div>
     <div class="w-100"></div>
     <label class="col">Select a command:</label>
+    <!--Dropdown for selecting a device using list of devices from component, disabled tag trigger when loading-->
     <div class="w-100"></div>
     <div class="col">
       <select [disabled]="loadingBool">
         <option *ngFor="let command of commands" (click)="setCommand(command.name)">
+          <!--Sets value as full name only shows placeholder-->
           {{command.placeholder}}
         </option>
       </select>
     </div>
     <div class="w-100"></div>
     <label *ngIf="versionSelectBool || versionRestoreSelectBool" class="col">Select a backup version:</label>
+    <!--Always show label-->
     <div class="w-100"></div>
-    <div *ngIf=versionSelectBool class="col" >
-        <angular2-multiselect [data]="versionsList" [settings]="settings" (onSelect)="onItemSelect($event)" (onDeSelect)="onItemDeSelect()" (onSelectAll)="onSelectAll()" (onDeSelectAll)="onDeSelectAll()" (onFilterSelectAll)="onFilterSelectAll()" (onFilterDeSelectAll)="onFilterDeSelectAll()">
-        </angular2-multiselect>
-      </div>
+    <div *ngIf=versionSelectBool class="col">
+      <!--Only show if delete is required and initialise by setting settings value-->
+      <angular2-multiselect [data]="versionsList" [settings]="settings" (onSelect)="onItemSelect($event)"
+        (onDeSelect)="onItemDeSelect()" (onSelectAll)="onSelectAll()" (onDeSelectAll)="onDeSelectAll()"
+        (onFilterSelectAll)="onFilterSelectAll()" (onFilterDeSelectAll)="onFilterDeSelectAll()">
+      </angular2-multiselect>
+    </div>
     <div *ngIf=versionRestoreSelectBool class="col">
+      <!--Otherwise only show restore selection-->
       <select [disabled]="loadingBool">
         <option *ngFor="let version of versionsList" (click)="setRestoreVersion(version)">
           {{version.placeholder}}
         </option>
       </select>
 
-  </div>
+    </div>
   </div>
 
   <br>
   <div class="row">
-    <button mat-button mat-raised-button style="color: white; background-color: rgb(31, 119, 180);" (click)="btnClick()"
-      class="col-xs-4 text-center" [disabled]="loadingBool">Run</button>
+    <!--Set buttons with bootstrap colours from custom theme and disable them if loading is happening-->
+    <button mat-button mat-raised-button [ngClass]="{
+      '':loadingBool,
+      'customBtn':!loadingBool
+    }" (click)="btnClick()" class="col-xs-4 text-center" [disabled]="loadingBool" style="color: white;">Run</button>
     <button mat-button mat-raised-button color="accent" style="color: white;" (click)="refreshDevices()"
       class="col-xs-4 text-center" [disabled]="loadingBool">Refresh Devices</button>
     <button mat-button mat-raised-button color="warn" style="color: white;" (click)="toggleBackup()"
       class="col-xs-4 text-center" [disabled]="loadingBool">Toggle auto-backup</button>
   </div>
   <svg width="800" height="600"></svg>
+  <!--Bounding box for network map-->
 </div>
-
-<!--  <svg width="60%" height="1200" class="mySvg" (click)="clicked($event)">
-      <rect x="0" y="0" width="100%" height="100%" stroke="black" fill="none" />
-  </svg> -->

@@ -1,5 +1,5 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { selectedData } from './selectedData';
 
@@ -9,12 +9,12 @@ import { selectedData } from './selectedData';
 
 export class DataService {
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) { } //Initalise Http client
 
-  serverAddress = '192.168.193.133:3000';
+  serverAddress = '192.168.193.133:3000'; //Localised Ip for easy ammending
 
-  runPlaybook(data: selectedData): Observable<object> {
-    return this.http.post<selectedData>(`http://${this.serverAddress}/api/`, data);
+  runPlaybook(data: selectedData): Observable<any> { //Send requests to API as object or any and return as promises
+    return this.http.post<selectedData>(`http://${this.serverAddress}/api/`, data,{observe:'response'});
   }
 
   getVersions(data: selectedData): Observable<object> {
