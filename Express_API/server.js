@@ -107,38 +107,34 @@ app.route('/api/:name').get((req, res) => { //Get request and response object fo
             }
           });
         });
-        if(nodes.length != 0) //ensure no link manipulation takes place when only one device present
+        if (nodes.length != 0) //ensure no link manipulation takes place when only one device present
         {
-        var k = -1;
-        links.forEach(function (l) {
-          k++;
-          links.forEach(function (o) {
-            var searchText = `${l.label.split("to")[1].trimLeft()} to ${l.label.split("to")[0].trimRight()}`;
-            if (l.source == o.target && searchText == o.label) { //If source and destination are the same for two links remove them from the array
+          var k = -1;
+          links.forEach(function (l) {
+            k++;
+            links.forEach(function (o) {
+              var searchText = `${l.label.split("to")[1].trimLeft()} to ${l.label.split("to")[0].trimRight()}`;
+              if (l.source == o.target && searchText == o.label) { //If source and destination are the same for two links remove them from the array
+                links.splice(k, 1);
+              }
+            });
+            var matchCounter = 0;
+            nodes.forEach(function (b) { //Remove any redundant links due to device being down
+              if (l.source == b.id) {
+                matchCounter++;
+              }
+              else if (l.target == b.id) {
+                matchCounter++;
+              }
+              else {
+                var matchCounter = 0;
+              }
+            });
+            if (matchCounter == 1) {
               links.splice(k, 1);
             }
           });
-          var matchCounter = 0;
-          nodes.forEach(function (b) { //Remove any redundant links due to device being down
-            if (l.source == b.id)
-            {
-              matchCounter++;
-            }
-            else if(l.target == b.id)
-            {
-              matchCounter++;
-            } 
-            else
-            {
-              var matchCounter = 0;
-            }
-          });
-          if(matchCounter == 1)
-          {
-            links.splice(k, 1);
-          }
-        });
-      }
+        }
         var deviceList = { nodes: nodes, links: links }; //Create final list with two headings nodes and links
         //store json in file
         var jsonContent = JSON.stringify(deviceList); //Convert list into JSON string to write to file
@@ -172,7 +168,7 @@ app.route('/api/').post((req, res) => {
     deviceF = "all";
   }
 
-  if (req.body.version != null && req.body.command == "unusedInterfaces") { //If command is this pass selected device to playbook and execute it.
+  if (req.body.command == "unusedInterfaces") { //If command is this pass selected device to playbook and execute it.
     command = new Ansible.Playbook().playbook(req.body.command)
       .variables({ selectedHost: deviceF });
 
@@ -188,45 +184,51 @@ app.route('/api/').post((req, res) => {
 
     promise.then(function (result) {
       shell.cd("/home/jason/Documents/backups");
-      var deviceUnusedList = shell.ls("*UnusedInterfaces*");
-      deviceUnusedList.forEach(function (d) {
-        var contents = readFileSync(`/home/jason/Documents/backups/${d}`, 'ascii').split('\n');
-        var device = contents[0].trimRight();
-        var intList = [];
-        for (i = 0; i <= contents.length - 1; i++) {
-          if (contents[i].includes("is up") && contents[i + 1].includes("Last input never")) { //If output of playbook contains last input never and is also up it is deemed unused
-            intList.push(contents[i].split("is up,")[0].trimRight());
-          }
+      
+      var contents = fs.readFileSync(`/home/jason/Documents/backups/${deviceF}-UnusedInterfaces.txt`, 'ascii').split('\n');
+      var device = contents[0].trimRight();
+      var intList = [];
+      for (i = 0; i <= contents.length - 1; i++) {
+        if (contents[i].includes("is up") && contents[i + 1].includes("Last input never")) { //If output of playbook contains last input never and is also up it is deemed unused
+          intList.push(contents[i].split("is up,")[0].trimRight());
         }
-        if (intList.length != 0) { //If port are unused then start stage two which is actually shutting them down by passing the interface list to the playbook
-          command = new Ansible.Playbook().playbook("unusedInterfaces2")
-            .variables({ selectedHost: device, unusedList: intList });
+      }
+      if (intList.length != 0) { //If port are unused then start stage two which is actually shutting them down by passing the interface list to the playbook
+        command = new Ansible.Playbook().playbook("unusedInterfaces2")
+          .variables({ selectedHost: device, unusedList: intList });
 
-          //Set inventory
-          command.inventory('hosts');
+        //Set inventory
+        command.inventory('hosts');
 
-          //live result
-          command.on('stdout', function (data) { console.log(data.toString()); });
-          command.on('stderr', function (data) { console.log(data.toString()); });
+        //live result
+        command.on('stdout', function (data) { console.log(data.toString()); });
+        command.on('stderr', function (data) { console.log(data.toString()); });
 
-          //Execute command
-          promise = command.exec({ cwd: "/etc/ansible/playbooks" });
+        //Execute command
+        promise = command.exec({ cwd: "/etc/ansible/playbooks" });
 
-          promise.then(function (result2) {
-            shell.rm("*UnusedInterfaces*"); //Send result of promise back to front end
-            res.status(201).send();
-          },function(err){
-            res.status(204).send();
-          });
-        }
-        else {
-          res.status(204).send(); //Show error if no unused ports
-        }
-      });
+        promise.then(function (result2) {
+          shell.cd("/home/jason/Documents/backups");
+          shell.rm("*UnusedInterfaces*"); //Send result of promise back to front end
+          res.status(201).send();
+        }, function (err) {
+          shell.cd("/home/jason/Documents/backups");
+          shell.rm("*UnusedInterfaces*"); //Send result of promise back to front end
+          res.status(500).send();
+        });
+      }
+      else {
+        shell.cd("/home/jason/Documents/backups");
+        res.status(500).send(); //Show error if no unused ports
+      }
+    }, function (err) {
+      shell.cd("/home/jason/Documents/backups");
+      res.status(500).send();
+      shell.rm("*UnusedInterfaces*");
     });
   }
 
-  else if (req.body.version != null && req.body.version != "" && req.body.command == "deleteDevice") {
+  else if (req.body.command == "deleteDevice") {
     var errorOccured = false;
 
     shell.cd("/home/jason/Documents/backups");
@@ -246,9 +248,9 @@ app.route('/api/').post((req, res) => {
 
   }
 
-  else if (req.body.version != null || req.body.version != "") { //For restore or delete pass list of versions to playbook and run the slected command from the front end
+  else if (req.body.command == "restoreDevice") { //For restore or delete pass list of versions to playbook and run the slected command from the front end
     command = new Ansible.Playbook().playbook(req.body.command)
-      .variables({ selectedHost: deviceF, selectedVersion: req.body.version[0] });
+      .variables({ selectedHost: deviceF, selectedVersion: req.body.version[0].name });
 
     //Set inventory
     command.inventory('hosts');
@@ -262,7 +264,7 @@ app.route('/api/').post((req, res) => {
 
     promise.then(function (result) {
       res.status(201).send();
-    },function(err) {
+    }, function (err) {
       res.status(500).send();
     });
   }
@@ -285,9 +287,9 @@ app.route('/api/').post((req, res) => {
     promise.then(function (result) {
       res.status(201).send();
     },
-    function(err){
-      res.status(500).send();
-    });
+      function (err) {
+        res.status(500).send();
+      });
   }
 });
 

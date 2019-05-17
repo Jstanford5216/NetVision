@@ -124,7 +124,7 @@ export class HomeComponent implements OnInit {
         .force("link", d3.forceLink().id((d: any) => d.id).distance(100).strength(1))
         .force('charge', d3.forceManyBody().strength(-2000))
         .force("center", d3.forceCenter(width / 4, height / 2));
-
+       
       const nodes: Node[] = [];
       const links: Link[] = [];
 
@@ -257,11 +257,11 @@ export class HomeComponent implements OnInit {
     if (this.selected.command == "deleteDevice") {
 
       this.subscription = this.data.runPlaybook(this.selected).subscribe(data => { //APi call to retrieve list of backups available for this device
-        console.log(data);
         if (data.status == "204") {  //If returned data is not null show success message in the alert diagram.
           this.noticeMessage = "Backup/s deleted successfully!"
           this.noticeSuccess = true;
           this.showNotice = true;
+          this.versionSelectCheck();
         }
         else {
           this.noticeMessage = "There was trouble removing your backup/s. Please contact your manager."; //If returned data is null show error message in the alert diagram.
@@ -278,7 +278,7 @@ export class HomeComponent implements OnInit {
     else if (this.selected.command == "unusedInterfaces")
     {
       this.subscription = this.data.runPlaybook(this.selected).subscribe(data => { //APi call to retrieve list of backups available for this device
-        if (data.status == "204") {  //If returned data is not null show success message in the alert diagram.
+        if (data.status == "201") {  //If returned data is not null show success message in the alert diagram.
           this.noticeMessage = "Unused interfaces shutdown successfully!"
           this.noticeSuccess = true;
           this.showNotice = true;
@@ -297,6 +297,7 @@ export class HomeComponent implements OnInit {
     }
     else { //If it is anything other than delete then pass the selecteddata to the API and proccess the response
       this.subscription = this.data.runPlaybook(this.selected).subscribe(data => {
+        console.log(data);
         if (data.status == "201") {  //If returned data is not null show success message in the alert diagram.
           this.noticeMessage = "Backup or restore completed successfully!";
           this.noticeSuccess = true;
@@ -323,6 +324,7 @@ export class HomeComponent implements OnInit {
     if (this.selected.command === "restoreDevice") {
 
       this.versionSelectBool = false;
+      this.versionRestoreSelectBool = false;
 
       this.subscription = this.data.getVersions(this.selected).subscribe(data => {
         for (let s in data) {
@@ -342,7 +344,6 @@ export class HomeComponent implements OnInit {
           this.showNotice = true;
         }
         else {
-          this.noticeSuccess = true;
           this.selected.version.push(this.versionsList[0].name); //Show successfully gathered backups
           this.versionRestoreSelectBool = true; //Show restore dropdown and hide delete dropdown
         }
@@ -356,6 +357,7 @@ export class HomeComponent implements OnInit {
     else if (this.selected.command === "deleteDevice") {
 
       this.versionRestoreSelectBool = false;
+      this.versionSelectBool = false;
 
       this.subscription = this.data.getVersions(this.selected).subscribe(data => {
         for (let s in data) {
@@ -377,7 +379,6 @@ export class HomeComponent implements OnInit {
           this.showNotice = true;
         }
         else {
-          this.noticeSuccess = true; //Show success as backups were found
           this.selected.version.push(this.versionsList[0].name);
           this.versionSelectBool = true; //Hide the restoredevice dropdown and show the multi-select one.
         }
@@ -420,11 +421,13 @@ export class HomeComponent implements OnInit {
 
     if (devicesFailed != "") {
       this.noticeMessage = `There was trouble gathering information for ${devicesFailed}. Please fix this before continuing.` //If list of failed devices is not blank show error with the list of failed devices
+      this.noticeSuccess = false;
       this.showNotice = true;
     }
 
     else {
       this.noticeSuccess = true; //No devices failed show success
+      this.showNotice = true;
       isError = false;
     }
     return isError;
@@ -465,7 +468,7 @@ export class HomeComponent implements OnInit {
 
   toggleBackup() {
     this.subscription = this.data.toggleBackup().subscribe(data => { //Send API request to toggle backup
-      if (data != -1) { //If response is not an error response show success message
+      if (data) { //If response is not an error response show success message
         this.noticeMessage = data.text;
         this.noticeSuccess = true;
         this.showNotice = true;
@@ -484,7 +487,6 @@ export class HomeComponent implements OnInit {
   }
   onItemSelect(item: any) {
     this.selected.version = AngularMultiSelect.prototype.selectedItems;
-    console.log(AngularMultiSelect.prototype.selectedItems);
   }
   onItemDeSelect(item: any) {
     this.selected.version = AngularMultiSelect.prototype.selectedItems; //Functions to update my object from the multiselect module
