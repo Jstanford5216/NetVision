@@ -1,7 +1,8 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core'; //Import list of modules
 import { AngularMultiSelect } from 'angular2-multiselect-dropdown';
 import * as d3 from 'd3';
-import { Subscription } from 'node_modules/rxjs';
+import { Subscription, Subject } from 'node_modules/rxjs';
+import {debounceTime} from 'rxjs/operators';
 import { DataService } from '../data.service';
 import { selectedData } from '../selectedData';
 
@@ -59,7 +60,9 @@ export class HomeComponent implements OnInit {
 
   showNotice = false;
 
-  noticeMessage = "";
+  noticeMessage = new Subject<string>();
+
+  changedMessage = "";
 
   loadingBool = false;
 
@@ -86,6 +89,14 @@ export class HomeComponent implements OnInit {
   }
 
   init2() {
+    setTimeout(() => this.showNotice = false, 10000);
+
+    this.noticeMessage.subscribe((message) => this.changedMessage = message);
+
+    this.noticeMessage.pipe(
+      debounceTime(5000)
+    ).subscribe();
+
     this.subscription = this.data.getCachedDevices().subscribe(data => { //Make request to API to get any previous network map device list
 
       this.devices = [
@@ -234,7 +245,7 @@ export class HomeComponent implements OnInit {
       }
 
     }, err => {
-      this.noticeMessage = "There was trouble connecting to the server. Please try again.";  //If API call fails show error message by setting text and bools
+      this.noticeMessage.next("There was trouble connecting to the server. Please try again.");  //If API call fails show error message by setting text and bools
       this.noticeSuccess = false;
       this.showNotice = true;
     });
@@ -258,19 +269,19 @@ export class HomeComponent implements OnInit {
 
       this.subscription = this.data.runPlaybook(this.selected).subscribe(data => { //APi call to retrieve list of backups available for this device
         if (data.status == "204") {  //If returned data is not null show success message in the alert diagram.
-          this.noticeMessage = "Backup/s deleted successfully!"
+          this.noticeMessage.next("Backup/s deleted successfully!");
           this.noticeSuccess = true;
           this.showNotice = true;
           this.versionSelectCheck();
         }
         else {
-          this.noticeMessage = "There was trouble removing your backup/s. Please contact your manager."; //If returned data is null show error message in the alert diagram.
+          this.noticeMessage.next("There was trouble removing your backup/s. Please contact your manager."); //If returned data is null show error message in the alert diagram.
           this.noticeSuccess = false;
           this.showNotice = true;
         }
       },
         err => { //If API call failed show error message
-          this.noticeMessage = "There was trouble connecting to the server. Please try again.";
+          this.noticeMessage.next("There was trouble connecting to the server. Please try again.");
           this.noticeSuccess = false;
           this.showNotice = true;
         });
@@ -279,18 +290,18 @@ export class HomeComponent implements OnInit {
     {
       this.subscription = this.data.runPlaybook(this.selected).subscribe(data => { //APi call to retrieve list of backups available for this device
         if (data.status == "201") {  //If returned data is not null show success message in the alert diagram.
-          this.noticeMessage = "Unused interfaces shutdown successfully!"
+          this.noticeMessage.next("Unused interfaces shutdown successfully!");
           this.noticeSuccess = true;
           this.showNotice = true;
         }
         else {
-          this.noticeMessage = "There was trouble shutting down unused interfaces. Please contact your manager."; //If returned data is null show error message in the alert diagram.
+          this.noticeMessage.next("There was trouble shutting down unused interfaces. Please contact your manager."); //If returned data is null show error message in the alert diagram.
           this.noticeSuccess = false;
           this.showNotice = true;
         }
       },
         err => { //If API call failed show error message
-          this.noticeMessage = "There was trouble connecting to the server. Please try again.";
+          this.noticeMessage.next("There was trouble connecting to the server. Please try again.");
           this.noticeSuccess = false;
           this.showNotice = true;
         });
@@ -299,18 +310,18 @@ export class HomeComponent implements OnInit {
       this.subscription = this.data.runPlaybook(this.selected).subscribe(data => {
         console.log(data);
         if (data.status == "201") {  //If returned data is not null show success message in the alert diagram.
-          this.noticeMessage = "Backup or restore completed successfully!";
+          this.noticeMessage.next("Backup or restore completed successfully!");
           this.noticeSuccess = true;
           this.showNotice = true;
         }
         else {
-          this.noticeMessage = "There was trouble restoring or backing up your device/s. Please contact your manager."; //If returned data is null show error message in the alert diagram.
+          this.noticeMessage.next("There was trouble restoring or backing up your device/s. Please contact your manager."); //If returned data is null show error message in the alert diagram.
           this.noticeSuccess = false;
           this.showNotice = true;
         }
       },
         err => { //If unable to connect to API show error message
-          this.noticeMessage = "There was trouble connecting to the server. Please try again.";
+          this.noticeMessage.next("There was trouble connecting to the server. Please try again.");
           this.noticeSuccess = false;
           this.showNotice = true;
         });
@@ -339,7 +350,8 @@ export class HomeComponent implements OnInit {
         }
 
         if (this.versionsList.length == 0) {
-          this.noticeMessage = "Could not find any backups for the selected device. Please select a different device and try again."; //No backups found will show error
+          this.noticeMessage.next("Could not find any backups for the selected device. Please select a different device and try again."); //No backups found will show error
+          console.log(this.changedMessage);
           this.noticeSuccess = false;
           this.showNotice = true;
         }
@@ -349,7 +361,7 @@ export class HomeComponent implements OnInit {
         }
       },
         err => { //Server error, show message
-          this.noticeMessage = "There was trouble connecting to the server. Please try again.";
+          this.noticeMessage.next("There was trouble connecting to the server. Please try again.");
           this.noticeSuccess = false;
           this.showNotice = true;
         });
@@ -374,7 +386,7 @@ export class HomeComponent implements OnInit {
         AngularMultiSelect.prototype.selectedItems = []; //Initalise empty array to start the script
 
         if (this.versionsList.length == 0) {
-          this.noticeMessage = "Could not find any backups for the selected device. Please select a different device and try again."; //Show error if none found.
+          this.noticeMessage.next("Could not find any backups for the selected device. Please select a different device and try again."); //Show error if none found.
           this.noticeSuccess = false;
           this.showNotice = true;
         }
@@ -384,7 +396,7 @@ export class HomeComponent implements OnInit {
         }
       },
         err => {
-          this.noticeMessage = "There was trouble connecting to the server. Please try again."; //Server error, show message
+          this.noticeMessage.next("There was trouble connecting to the server. Please try again."); //Server error, show message
           this.noticeSuccess = false;
           this.showNotice = true;
         });
@@ -420,7 +432,7 @@ export class HomeComponent implements OnInit {
     });
 
     if (devicesFailed != "") {
-      this.noticeMessage = `There was trouble gathering information for ${devicesFailed}. Please fix this before continuing.` //If list of failed devices is not blank show error with the list of failed devices
+      this.noticeMessage.next(`There was trouble gathering information for ${devicesFailed}. Please fix this before continuing.`); //If list of failed devices is not blank show error with the list of failed devices
       this.noticeSuccess = false;
       this.showNotice = true;
     }
@@ -460,7 +472,7 @@ export class HomeComponent implements OnInit {
 
     },
       err => {
-        this.noticeMessage = "There was trouble connecting to the server. Please try again."; //Server error, display message
+        this.noticeMessage.next("There was trouble connecting to the server. Please try again."); //Server error, display message
         this.noticeSuccess = false;
         this.showNotice = true;
       });
@@ -474,13 +486,13 @@ export class HomeComponent implements OnInit {
         this.showNotice = true;
       }
       else {
-        this.noticeMessage = "There was an error toggling auto-backup. Please try again."; //Show error if status was -1(failure)
+        this.noticeMessage.next("There was an error toggling auto-backup. Please try again."); //Show error if status was -1(failure)
         this.noticeSuccess = false;
         this.showNotice = true;
       }
     },
       err => { //If nop connection can be made at all show error message
-        this.noticeMessage = "There was trouble connecting to the server. Please try again.";
+        this.noticeMessage.next("There was trouble connecting to the server. Please try again.");
         this.noticeSuccess = false;
         this.showNotice = true;
       });
@@ -510,5 +522,4 @@ export class HomeComponent implements OnInit {
     tempArray.push(version);
     this.selected.version = tempArray;
   }
-
 }
