@@ -35,7 +35,7 @@
     <div class="w-100"></div>
     <div class="col">
       <select [disabled]="loadingBool">
-        <option *ngFor="let device of devices" (click)="setDevice(device)">
+        <option *ngFor="let device of devicesInit" (click)="setDevice(device)">
           <!--Dropdown for selecting a device using list of devices from component, disabled tag trigger when loading-->
           {{device}}
           <!--Loop for populating select list with options, on click this will update selected value-->

@@ -139,11 +139,29 @@ export class HomeComponent implements OnInit {
       const nodes: Node[] = [];
       const links: Link[] = [];
 
-      data.nodes.forEach((d) => { //For every node in the returned data store it in local node array and append static device list
-        nodes.push(<Node>d);
+      data.nodes.forEach((d) => { //For every node in the returned data append to static device list
         this.devices.push(<Node>d.id)
       });
 
+      this.devicesInit = this.devices; //Update values to be used by dropdown
+
+      data.nodes.forEach((d) => { //For every node in the returned data filter by selected 
+        if(this.selected.device == "All_Switches"){
+        //filter if contains switch
+        }
+        else if (this.selected.device == "All_Routers"){
+          //filter if contains router
+        }
+        else if (this.selected.device == d.id){ //filter to selected
+          return d;
+        }
+        //No matches means query is All_Devices so no filtering needed. 
+      });
+
+      data.nodes.forEach((d) =>{
+        nodes.push(<Node>d);      //store filtered data in local array
+      });
+      
       data.links.forEach((d) => { //For every node in the returned data store it in local node array and append static device lis
         links.push(<Link>d);
       });
