@@ -89,13 +89,8 @@ export class HomeComponent implements OnInit {
   }
 
   init2() {
-    setTimeout(() => this.showNotice = false, 10000);
 
     this.noticeMessage.subscribe((message) => this.changedMessage = message);
-
-    this.noticeMessage.pipe(
-      debounceTime(5000)
-    ).subscribe();
 
     this.subscription = this.data.getCachedDevices().subscribe(data => { //Make request to API to get any previous network map device list
 
@@ -145,7 +140,7 @@ export class HomeComponent implements OnInit {
 
       this.devicesInit = this.devices; //Update values to be used by dropdown
 
-      data.nodes.forEach((d) => { //For every node in the returned data filter by selected 
+      /* data.nodes.forEach((d) => { //For every node in the returned data filter by selected 
         if(this.selected.device == "All_Switches"){
         //filter if contains switch
         }
@@ -156,7 +151,7 @@ export class HomeComponent implements OnInit {
           return d;
         }
         //No matches means query is All_Devices so no filtering needed. 
-      });
+      }); */
 
       data.nodes.forEach((d) =>{
         nodes.push(<Node>d);      //store filtered data in local array
@@ -266,6 +261,7 @@ export class HomeComponent implements OnInit {
       this.noticeMessage.next("There was trouble connecting to the server. Please try again.");  //If API call fails show error message by setting text and bools
       this.noticeSuccess = false;
       this.showNotice = true;
+      setTimeout(() => this.showNotice = false, 5000); 
     });
   }
   ngOnDestroy() {
@@ -290,18 +286,21 @@ export class HomeComponent implements OnInit {
           this.noticeMessage.next("Backup/s deleted successfully!");
           this.noticeSuccess = true;
           this.showNotice = true;
+          setTimeout(() => this.showNotice = false, 5000); 
           this.versionSelectCheck();
         }
         else {
           this.noticeMessage.next("There was trouble removing your backup/s. Please contact your manager."); //If returned data is null show error message in the alert diagram.
           this.noticeSuccess = false;
           this.showNotice = true;
+          setTimeout(() => this.showNotice = false, 5000); 
         }
       },
         err => { //If API call failed show error message
           this.noticeMessage.next("There was trouble connecting to the server. Please try again.");
           this.noticeSuccess = false;
           this.showNotice = true;
+          setTimeout(() => this.showNotice = false, 5000); 
         });
     }
     else if (this.selected.command == "unusedInterfaces")
@@ -311,17 +310,20 @@ export class HomeComponent implements OnInit {
           this.noticeMessage.next("Unused interfaces shutdown successfully!");
           this.noticeSuccess = true;
           this.showNotice = true;
+          setTimeout(() => this.showNotice = false, 5000); 
         }
         else {
           this.noticeMessage.next("There was trouble shutting down unused interfaces. Please contact your manager."); //If returned data is null show error message in the alert diagram.
           this.noticeSuccess = false;
           this.showNotice = true;
+          setTimeout(() => this.showNotice = false, 5000); 
         }
       },
         err => { //If API call failed show error message
           this.noticeMessage.next("There was trouble connecting to the server. Please try again.");
           this.noticeSuccess = false;
           this.showNotice = true;
+          setTimeout(() => this.showNotice = false, 5000); 
         });
     }
     else { //If it is anything other than delete then pass the selecteddata to the API and proccess the response
@@ -331,17 +333,20 @@ export class HomeComponent implements OnInit {
           this.noticeMessage.next("Backup or restore completed successfully!");
           this.noticeSuccess = true;
           this.showNotice = true;
+          setTimeout(() => this.showNotice = false, 5000); 
         }
         else {
           this.noticeMessage.next("There was trouble restoring or backing up your device/s. Please contact your manager."); //If returned data is null show error message in the alert diagram.
           this.noticeSuccess = false;
           this.showNotice = true;
+          setTimeout(() => this.showNotice = false, 5000); 
         }
       },
         err => { //If unable to connect to API show error message
           this.noticeMessage.next("There was trouble connecting to the server. Please try again.");
           this.noticeSuccess = false;
           this.showNotice = true;
+          setTimeout(() => this.showNotice = false, 5000); 
         });
     }
   }
@@ -372,6 +377,7 @@ export class HomeComponent implements OnInit {
           console.log(this.changedMessage);
           this.noticeSuccess = false;
           this.showNotice = true;
+          setTimeout(() => this.showNotice = false, 5000); 
         }
         else {
           this.selected.version.push(this.versionsList[0].name); //Show successfully gathered backups
@@ -382,6 +388,7 @@ export class HomeComponent implements OnInit {
           this.noticeMessage.next("There was trouble connecting to the server. Please try again.");
           this.noticeSuccess = false;
           this.showNotice = true;
+          setTimeout(() => this.showNotice = false, 5000); 
         });
     }
     else if (this.selected.command === "deleteDevice") {
@@ -407,6 +414,7 @@ export class HomeComponent implements OnInit {
           this.noticeMessage.next("Could not find any backups for the selected device. Please select a different device and try again."); //Show error if none found.
           this.noticeSuccess = false;
           this.showNotice = true;
+          setTimeout(() => this.showNotice = false, 5000); 
         }
         else {
           this.selected.version.push(this.versionsList[0].name);
@@ -417,6 +425,7 @@ export class HomeComponent implements OnInit {
           this.noticeMessage.next("There was trouble connecting to the server. Please try again."); //Server error, show message
           this.noticeSuccess = false;
           this.showNotice = true;
+          setTimeout(() => this.showNotice = false, 5000); 
         });
     }
     else {
@@ -450,9 +459,11 @@ export class HomeComponent implements OnInit {
     });
 
     if (devicesFailed != "") {
-      this.noticeMessage.next(`There was trouble gathering information for ${devicesFailed}. Please fix this before continuing.`); //If list of failed devices is not blank show error with the list of failed devices
+      var message:any = `There was trouble gathering information for ${devicesFailed}. Please fix this before continuing.`;
+      this.noticeMessage = message; //If list of failed devices is not blank show error with the list of failed devices
       this.noticeSuccess = false;
       this.showNotice = true;
+      setTimeout(() => this.showNotice = false, 10000); 
     }
 
     else {
@@ -486,13 +497,14 @@ export class HomeComponent implements OnInit {
         this.showResult = false;
         this.discoverSuccessfulBool = false;
         this.discoverResult = "";
-      }, 10000);
+      }, 5000);
 
     },
       err => {
         this.noticeMessage.next("There was trouble connecting to the server. Please try again."); //Server error, display message
         this.noticeSuccess = false;
         this.showNotice = true;
+        setTimeout(() => this.showNotice = false, 5000); 
       });
   }
 
@@ -502,17 +514,20 @@ export class HomeComponent implements OnInit {
         this.noticeMessage = data.text;
         this.noticeSuccess = true;
         this.showNotice = true;
+        setTimeout(() => this.showNotice = false, 5000); 
       }
       else {
         this.noticeMessage.next("There was an error toggling auto-backup. Please try again."); //Show error if status was -1(failure)
         this.noticeSuccess = false;
         this.showNotice = true;
+        setTimeout(() => this.showNotice = false, 5000); 
       }
     },
       err => { //If nop connection can be made at all show error message
         this.noticeMessage.next("There was trouble connecting to the server. Please try again.");
         this.noticeSuccess = false;
         this.showNotice = true;
+        setTimeout(() => this.showNotice = false, 5000); 
       });
   }
   onItemSelect(item: any) {

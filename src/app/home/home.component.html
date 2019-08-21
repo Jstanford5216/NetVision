@@ -7,7 +7,7 @@
     <span aria-hidden="true">&times;</span>
   </button>
   <strong>Notice</strong>
-  <p>{{ changedMessage }}</p>
+  <p>{{ noticeMessage }}</p>
   <!--Insert any messages from source that activated the alertbox-->
 </div>
 
@@ -24,7 +24,7 @@
   <div *ngIf=showResult [ngClass]="{
       'successAlert':discoverSuccessfulBool,
       'dangerAlert':!discoverSuccessfulBool 
-    }">"{{changedMessage}}"
+    }">"{{ discoverResult }}"
     <!--Box that displays upon completion of refreshed devices -->
   </div>
 </div>
