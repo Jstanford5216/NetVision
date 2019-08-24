@@ -11,7 +11,7 @@ export class DataService {
 
   constructor(private http: HttpClient) { } //Initalise Http client
 
-  serverAddress = '192.168.193.133:3000'; //Localised Ip for easy ammending
+  serverAddress = 'IP Address Here:3000'; //Localised Ip for easy ammending
 
   runPlaybook(data: selectedData): Observable<any> { //Send requests to API as object or any and return as promises
     return this.http.post<selectedData>(`http://${this.serverAddress}/api/`, data,{observe:'response'});
