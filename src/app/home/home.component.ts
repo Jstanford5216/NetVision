@@ -2,7 +2,6 @@ import { Component, OnInit, ViewEncapsulation } from '@angular/core'; //Import l
 import { AngularMultiSelect } from 'angular2-multiselect-dropdown';
 import * as d3 from 'd3';
 import { Subscription, Subject } from 'node_modules/rxjs';
-import {debounceTime} from 'rxjs/operators';
 import { DataService } from '../data.service';
 import { selectedData } from '../selectedData';
 
@@ -43,8 +42,8 @@ export class HomeComponent implements OnInit {
 
   //Declare variables 
   noticeSuccess: boolean;
-  
-  devices: Object[] = []; 
+
+  devices: Object[] = [];
 
   commands: Object;
 
@@ -60,9 +59,7 @@ export class HomeComponent implements OnInit {
 
   showNotice = false;
 
-  noticeMessage = new Subject<string>();
-
-  changedMessage = "";
+  noticeMessage = "";
 
   loadingBool = false;
 
@@ -84,13 +81,13 @@ export class HomeComponent implements OnInit {
 
   ngOnInit() {
     //When component loads
+    this.selected.device = "All_Devices"; //Set default selected devices
+    this.selected.command = "backupDevice";
     this.init2();
     this.noticeSuccess = false;
   }
 
   init2() {
-
-    this.noticeMessage.subscribe((message) => this.changedMessage = message);
 
     this.subscription = this.data.getCachedDevices().subscribe(data => { //Make request to API to get any previous network map device list
 
@@ -113,13 +110,10 @@ export class HomeComponent implements OnInit {
         primaryKey: 'name'
       };
 
-      this.selected.device = "All_Devices"; //Set default selected devices
-      this.selected.command = "backupDevice";
-      
       d3.selectAll('g').remove();
       d3.selectAll('path').remove(); //Clear any old maps to make way for a new one
       d3.selectAll('text').remove();
-      
+
       var svg = d3.select('svg');
       const width = +svg.attr('width'); //Initalise width and height of svg bounding box
       const height = +svg.attr('height');
@@ -129,8 +123,9 @@ export class HomeComponent implements OnInit {
       const simulation = d3.forceSimulation() //Create an empty simulation with opposing distance to keep nodes separated and aligned to the center of bounding box
         .force("link", d3.forceLink().id((d: any) => d.id).distance(100).strength(1))
         .force('charge', d3.forceManyBody().strength(-2000))
-        .force("center", d3.forceCenter(width / 4, height / 2));
-       
+        .force("center", d3.forceCenter(width / 4, height / 2))
+        .stop();
+
       const nodes: Node[] = [];
       const links: Link[] = [];
 
@@ -140,28 +135,61 @@ export class HomeComponent implements OnInit {
 
       this.devicesInit = this.devices; //Update values to be used by dropdown
 
-      /* data.nodes.forEach((d) => { //For every node in the returned data filter by selected 
-        if(this.selected.device == "All_Switches"){
-        //filter if contains switch
-        }
-        else if (this.selected.device == "All_Routers"){
-          //filter if contains router
-        }
-        else if (this.selected.device == d.id){ //filter to selected
-          return d;
-        }
-        //No matches means query is All_Devices so no filtering needed. 
-      }); */
+      if (this.selected.device == "All_Routers") {
+        data.nodes.forEach((d) => {
+          if (d.id.includes("R")) {
+            var temp: Node = d;
+            temp.group = 1;
+            nodes.push(temp);
+          }
+          else {
+            nodes.push(<Node>d);
+          }
+        });
+      }
+      else if (this.selected.device == "All_Switches") {
+        data.nodes.forEach((d) => {
+          if (d.id.includes("S")) {
+            var temp: Node = d;
+            temp.group = 1;
+            nodes.push(temp);
+          }
+          else {
+            nodes.push(<Node>d);
+          }
+        });
+      }
+      else if (this.selected.device == "All_Devices") {
+        data.nodes.forEach((d) => {
+          nodes.push(<Node>d);
+        });
+      }
+      else {
+        data.nodes.forEach((d) => {
+          if (d.id == this.selected.device) {
+            var temp: Node = d;
+            temp.group = 1;
+            nodes.push(temp);
+          }
+          else {
+            nodes.push(<Node>d);
+          }
+        });
+      }
 
-      data.nodes.forEach((d) =>{
-        nodes.push(<Node>d);      //store filtered data in local array
-      });
-      
       data.links.forEach((d) => { //For every node in the returned data store it in local node array and append static device lis
         links.push(<Link>d);
       });
 
       const graph: Graph = <Graph>{ nodes, links }; //Append interface arrays to instance of the graph interface
+
+      simulation
+        .nodes(graph.nodes);
+
+      simulation.force<d3.ForceLink<any, any>>('link') //Space the nodes out based on force settings
+        .links(graph.links);
+
+      for (var i = 0; i < 300; ++i) simulation.tick();
 
       const link = svg.append('g')
         .attr('class', 'links')
@@ -170,7 +198,11 @@ export class HomeComponent implements OnInit {
         .enter()
         .insert("line", "nodes")
         .attr("class", "link")
-        .attr('stroke-width', 3);
+        .attr('stroke-width', 3)
+        .attr('x1', function (d: any) { return d.source.x; })
+        .attr('y1', function (d: any) { return d.source.y; })
+        .attr('x2', function (d: any) { return d.target.x; })
+        .attr('y2', function (d: any) { return d.target.y; });
 
       const edgepaths = svg.selectAll(".edgepath")  //create path above normal path and add labels to ensure they are above the links not on them
         .data(links)
@@ -180,7 +212,10 @@ export class HomeComponent implements OnInit {
         .attr('fill-opacity', 0)
         .attr('stroke-opacity', 0)
         .attr('id', function (d, i) { return 'edgepath' + i })
-        .style('pointer-events', 'none');
+        .style('pointer-events', 'none')
+        .attr('d', function (d: any) {
+          return 'M ' + d.source.x + ' ' + (d.source.y - 10) + ' L ' + d.target.x + ' ' + (d.target.y - 10);
+        });
 
       const edgelabels = svg.selectAll(".edgelabel")
         .data(links)
@@ -190,7 +225,19 @@ export class HomeComponent implements OnInit {
         .attr('class', 'edgelabel')
         .attr('id', function (d, i) { return 'edgelabel' + i })
         .attr('font-size', 10)
-        .attr('fill', 'black');
+        .attr('fill', 'black')
+        .attr('transform', function (d: any) {
+          if (d.target.x < d.source.x) { //If the target x is lower down than source x flip the label
+            var bbox = this.getBBox();
+
+            var rx = bbox.x + bbox.width / 2;
+            var ry = bbox.y + bbox.height / 2;
+            return 'rotate(180 ' + rx + ' ' + (ry + 10) + ')';
+          }
+          else {
+            return 'rotate(0)';
+          }
+        });
 
       edgelabels.append('textPath')
         .attr('xlink:href', function (d, i) { return '#edgepath' + i }) //Ensure the text is placed at the same angle as the lines
@@ -207,6 +254,8 @@ export class HomeComponent implements OnInit {
         .append('circle')
         .attr('r', 6)
         .attr('fill', (d: any) => color(d.group)) //Create circles based of nodes decided colour from id
+        .attr('cx', function (d: any) { return d.x; })
+        .attr('cy', function (d: any) { return d.y; });
 
       const label = svg.selectAll('.text')
         .data(nodes)
@@ -215,54 +264,17 @@ export class HomeComponent implements OnInit {
         .text(function (d: any) { return d.id; }) //Text styling
         .style("text-anchor", "middle")
         .style("fill", 'black')
-        .style("font-size", 5);
-
-      simulation
-        .nodes(graph.nodes)
-        .on('tick', ticked); //When simulation ticks intialise graph based on x y settings below
-
-      simulation.force<d3.ForceLink<any, any>>('link') //Space the nodes out based on force settings
-        .links(graph.links);
-
-      function ticked() {
-        link
-          .attr('x1', function (d: any) { return d.source.x; })
-          .attr('y1', function (d: any) { return d.source.y; })
-          .attr('x2', function (d: any) { return d.target.x; })
-          .attr('y2', function (d: any) { return d.target.y; });
-
-        node
-          .attr('cx', function (d: any) { return d.x; })
-          .attr('cy', function (d: any) { return d.y; });
-
-        label
-          .attr("x", function (d: any) { return d.x; })
-          .attr("y", function (d: any) { return d.y; });
-
-        edgepaths.attr('d', function (d: any) {
-          return 'M ' + d.source.x + ' ' + (d.source.y - 10) + ' L ' + d.target.x + ' ' + (d.target.y - 10);
-        });
-
-        edgelabels.attr('transform', function (d: any) {
-          if (d.target.x < d.source.x) { //If the target x is lower down than source x flip the label
-            var bbox = this.getBBox();
-
-            var rx = bbox.x + bbox.width / 2; 
-            var ry = bbox.y + bbox.height / 2;
-            return 'rotate(180 ' + rx + ' ' + (ry + 10) + ')';
-          }
-          else {
-            return 'rotate(0)';
-          }
-        });
-      }
+        .style("font-size", 5)
+        .attr("x", function (d: any) { return d.x; })
+        .attr("y", function (d: any) { return d.y; });
 
     }, err => {
-      this.noticeMessage.next("There was trouble connecting to the server. Please try again.");  //If API call fails show error message by setting text and bools
+      this.noticeMessage = "There was trouble connecting to the server. Please try again.";  //If API call fails show error message by setting text and bools
       this.noticeSuccess = false;
       this.showNotice = true;
-      setTimeout(() => this.showNotice = false, 5000); 
+      setTimeout(() => this.showNotice = false, 5000);
     });
+
   }
   ngOnDestroy() {
     this.subscription.unsubscribe(); //When user navigates destroy subscription to avoid memory leaks
@@ -271,6 +283,7 @@ export class HomeComponent implements OnInit {
   setDevice($device) {
     this.selected.device = $device; //Set selected device from html
     this.versionSelectCheck();
+    this.init2();
   }
 
   setCommand($command) {
@@ -283,70 +296,69 @@ export class HomeComponent implements OnInit {
 
       this.subscription = this.data.runPlaybook(this.selected).subscribe(data => { //APi call to retrieve list of backups available for this device
         if (data.status == "204") {  //If returned data is not null show success message in the alert diagram.
-          this.noticeMessage.next("Backup/s deleted successfully!");
+          this.noticeMessage = "Backup/s deleted successfully!";
           this.noticeSuccess = true;
           this.showNotice = true;
-          setTimeout(() => this.showNotice = false, 5000); 
+          setTimeout(() => this.showNotice = false, 5000);
           this.versionSelectCheck();
         }
         else {
-          this.noticeMessage.next("There was trouble removing your backup/s. Please contact your manager."); //If returned data is null show error message in the alert diagram.
+          this.noticeMessage = "There was trouble removing your backup/s. Please contact your manager."; //If returned data is null show error message in the alert diagram.
           this.noticeSuccess = false;
           this.showNotice = true;
-          setTimeout(() => this.showNotice = false, 5000); 
+          setTimeout(() => this.showNotice = false, 5000);
         }
       },
         err => { //If API call failed show error message
-          this.noticeMessage.next("There was trouble connecting to the server. Please try again.");
+          this.noticeMessage = "There was trouble connecting to the server. Please try again.";
           this.noticeSuccess = false;
           this.showNotice = true;
-          setTimeout(() => this.showNotice = false, 5000); 
+          setTimeout(() => this.showNotice = false, 5000);
         });
     }
-    else if (this.selected.command == "unusedInterfaces")
-    {
+    else if (this.selected.command == "unusedInterfaces") {
       this.subscription = this.data.runPlaybook(this.selected).subscribe(data => { //APi call to retrieve list of backups available for this device
         if (data.status == "201") {  //If returned data is not null show success message in the alert diagram.
-          this.noticeMessage.next("Unused interfaces shutdown successfully!");
+          this.noticeMessage = "Unused interfaces shutdown successfully!";
           this.noticeSuccess = true;
           this.showNotice = true;
-          setTimeout(() => this.showNotice = false, 5000); 
+          setTimeout(() => this.showNotice = false, 5000);
         }
         else {
-          this.noticeMessage.next("There was trouble shutting down unused interfaces. Please contact your manager."); //If returned data is null show error message in the alert diagram.
+          this.noticeMessage = "There was trouble shutting down unused interfaces. Please contact your manager."; //If returned data is null show error message in the alert diagram.
           this.noticeSuccess = false;
           this.showNotice = true;
-          setTimeout(() => this.showNotice = false, 5000); 
+          setTimeout(() => this.showNotice = false, 5000);
         }
       },
         err => { //If API call failed show error message
-          this.noticeMessage.next("There was trouble connecting to the server. Please try again.");
+          this.noticeMessage = "There was trouble connecting to the server. Please try again.";
           this.noticeSuccess = false;
           this.showNotice = true;
-          setTimeout(() => this.showNotice = false, 5000); 
+          setTimeout(() => this.showNotice = false, 5000);
         });
     }
     else { //If it is anything other than delete then pass the selecteddata to the API and proccess the response
       this.subscription = this.data.runPlaybook(this.selected).subscribe(data => {
         console.log(data);
         if (data.status == "201") {  //If returned data is not null show success message in the alert diagram.
-          this.noticeMessage.next("Backup or restore completed successfully!");
+          this.noticeMessage = "Backup or restore completed successfully!";
           this.noticeSuccess = true;
           this.showNotice = true;
-          setTimeout(() => this.showNotice = false, 5000); 
+          setTimeout(() => this.showNotice = false, 5000);
         }
         else {
-          this.noticeMessage.next("There was trouble restoring or backing up your device/s. Please contact your manager."); //If returned data is null show error message in the alert diagram.
+          this.noticeMessage = "There was trouble restoring or backing up your device/s. Please contact your manager."; //If returned data is null show error message in the alert diagram.
           this.noticeSuccess = false;
           this.showNotice = true;
-          setTimeout(() => this.showNotice = false, 5000); 
+          setTimeout(() => this.showNotice = false, 5000);
         }
       },
         err => { //If unable to connect to API show error message
-          this.noticeMessage.next("There was trouble connecting to the server. Please try again.");
+          this.noticeMessage = "There was trouble connecting to the server. Please try again.";
           this.noticeSuccess = false;
           this.showNotice = true;
-          setTimeout(() => this.showNotice = false, 5000); 
+          setTimeout(() => this.showNotice = false, 5000);
         });
     }
   }
@@ -373,11 +385,10 @@ export class HomeComponent implements OnInit {
         }
 
         if (this.versionsList.length == 0) {
-          this.noticeMessage.next("Could not find any backups for the selected device. Please select a different device and try again."); //No backups found will show error
-          console.log(this.changedMessage);
+          this.noticeMessage = "Could not find any backups for the selected device. Please select a different device and try again."; //No backups found will show error
           this.noticeSuccess = false;
           this.showNotice = true;
-          setTimeout(() => this.showNotice = false, 5000); 
+          setTimeout(() => this.showNotice = false, 5000);
         }
         else {
           this.selected.version.push(this.versionsList[0].name); //Show successfully gathered backups
@@ -385,10 +396,10 @@ export class HomeComponent implements OnInit {
         }
       },
         err => { //Server error, show message
-          this.noticeMessage.next("There was trouble connecting to the server. Please try again.");
+          this.noticeMessage = "There was trouble connecting to the server. Please try again.";
           this.noticeSuccess = false;
           this.showNotice = true;
-          setTimeout(() => this.showNotice = false, 5000); 
+          setTimeout(() => this.showNotice = false, 5000);
         });
     }
     else if (this.selected.command === "deleteDevice") {
@@ -411,10 +422,10 @@ export class HomeComponent implements OnInit {
         AngularMultiSelect.prototype.selectedItems = []; //Initalise empty array to start the script
 
         if (this.versionsList.length == 0) {
-          this.noticeMessage.next("Could not find any backups for the selected device. Please select a different device and try again."); //Show error if none found.
+          this.noticeMessage = "Could not find any backups for the selected device. Please select a different device and try again."; //Show error if none found.
           this.noticeSuccess = false;
           this.showNotice = true;
-          setTimeout(() => this.showNotice = false, 5000); 
+          setTimeout(() => this.showNotice = false, 5000);
         }
         else {
           this.selected.version.push(this.versionsList[0].name);
@@ -422,10 +433,10 @@ export class HomeComponent implements OnInit {
         }
       },
         err => {
-          this.noticeMessage.next("There was trouble connecting to the server. Please try again."); //Server error, show message
+          this.noticeMessage = "There was trouble connecting to the server. Please try again."; //Server error, show message
           this.noticeSuccess = false;
           this.showNotice = true;
-          setTimeout(() => this.showNotice = false, 5000); 
+          setTimeout(() => this.showNotice = false, 5000);
         });
     }
     else {
@@ -459,11 +470,11 @@ export class HomeComponent implements OnInit {
     });
 
     if (devicesFailed != "") {
-      var message:any = `There was trouble gathering information for ${devicesFailed}. Please fix this before continuing.`;
+      var message: any = `There was trouble gathering information for ${devicesFailed}. Please fix this before continuing.`;
       this.noticeMessage = message; //If list of failed devices is not blank show error with the list of failed devices
       this.noticeSuccess = false;
       this.showNotice = true;
-      setTimeout(() => this.showNotice = false, 10000); 
+      setTimeout(() => this.showNotice = false, 10000);
     }
 
     else {
@@ -480,7 +491,11 @@ export class HomeComponent implements OnInit {
 
     this.subscription = this.data.getNewDevices().subscribe(data => { //Call API to gather new devices
       var isError = this.proccessResult(data); //Finds out if any devices encountered an error from other function
+
       this.init2(); //Re-draw network map
+      this.selected.device = "All_Devices";
+      this.selected.command = "backupDevice";
+
       if (isError == false) { //If there was no errors show success in loading div
         this.discoverResult = "Successfully retreived devices";
         this.discoverSuccessfulBool = true;
@@ -501,10 +516,10 @@ export class HomeComponent implements OnInit {
 
     },
       err => {
-        this.noticeMessage.next("There was trouble connecting to the server. Please try again."); //Server error, display message
+        this.noticeMessage = "There was trouble connecting to the server. Please try again."; //Server error, display message
         this.noticeSuccess = false;
         this.showNotice = true;
-        setTimeout(() => this.showNotice = false, 5000); 
+        setTimeout(() => this.showNotice = false, 5000);
       });
   }
 
@@ -514,20 +529,20 @@ export class HomeComponent implements OnInit {
         this.noticeMessage = data.text;
         this.noticeSuccess = true;
         this.showNotice = true;
-        setTimeout(() => this.showNotice = false, 5000); 
+        setTimeout(() => this.showNotice = false, 5000);
       }
       else {
-        this.noticeMessage.next("There was an error toggling auto-backup. Please try again."); //Show error if status was -1(failure)
+        this.noticeMessage = "There was an error toggling auto-backup. Please try again."; //Show error if status was -1(failure)
         this.noticeSuccess = false;
         this.showNotice = true;
-        setTimeout(() => this.showNotice = false, 5000); 
+        setTimeout(() => this.showNotice = false, 5000);
       }
     },
       err => { //If nop connection can be made at all show error message
-        this.noticeMessage.next("There was trouble connecting to the server. Please try again.");
+        this.noticeMessage = "There was trouble connecting to the server. Please try again.";
         this.noticeSuccess = false;
         this.showNotice = true;
-        setTimeout(() => this.showNotice = false, 5000); 
+        setTimeout(() => this.showNotice = false, 5000);
       });
   }
   onItemSelect(item: any) {
@@ -550,7 +565,7 @@ export class HomeComponent implements OnInit {
     this.selected.version = AngularMultiSelect.prototype.selectedItems;
   }
 
-  setRestoreVersion(version){
+  setRestoreVersion(version) {
     var tempArray = [] //Empty array on new values and append to a new array, then set the version list.
     tempArray.push(version);
     this.selected.version = tempArray;

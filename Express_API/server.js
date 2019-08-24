@@ -88,13 +88,7 @@ app.route('/api/:name').get((req, res) => { //Get request and response object fo
           i++;
           var contents = fs.readFileSync(`/home/jason/Documents/backups/${d}`, 'ascii').split('\n');
           var j = -1;
-          var node = {};
-          if (contents[0].includes("SW")) {
-            node = { id: contents[0].trimRight(), group: 2 } //Change colour based on name for switch or router
-          }
-          else {
-            node = { id: contents[0].trimRight(), group: 1 };
-          }
+          var node = { id: contents[0].trimRight(), group: 1 } //Change colour based on name for switch or router
           nodes.push(node); //Add formatted nodes to array
           contents.forEach(function (c) {
             j++;
