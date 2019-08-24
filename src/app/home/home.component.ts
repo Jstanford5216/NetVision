@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core'; //Import list of modules
 import { AngularMultiSelect } from 'angular2-multiselect-dropdown';
 import * as d3 from 'd3';
-import { Subscription, Subject } from 'node_modules/rxjs';
+import { Subscription } from 'node_modules/rxjs';
 import { DataService } from '../data.service';
 import { selectedData } from '../selectedData';
 
@@ -89,7 +89,7 @@ export class HomeComponent implements OnInit {
 
   init2() {
 
-    this.subscription = this.data.getCachedDevices().subscribe(data => { //Make request to API to get any previous network map device list
+    this.subscription = this.data.getCachedDevices().subscribe(async data => { //Make request to API to get any previous network map device list
 
       this.devices = [
         "All_Devices",
@@ -129,53 +129,17 @@ export class HomeComponent implements OnInit {
       const nodes: Node[] = [];
       const links: Link[] = [];
 
+      console.log(data.nodes);
+
       data.nodes.forEach((d) => { //For every node in the returned data append to static device list
         this.devices.push(<Node>d.id)
       });
 
       this.devicesInit = this.devices; //Update values to be used by dropdown
 
-      if (this.selected.device == "All_Routers") {
-        data.nodes.forEach((d) => {
-          if (d.id.includes("R")) {
-            var temp: Node = d;
-            temp.group = 1;
-            nodes.push(temp);
-          }
-          else {
-            nodes.push(<Node>d);
-          }
-        });
-      }
-      else if (this.selected.device == "All_Switches") {
-        data.nodes.forEach((d) => {
-          if (d.id.includes("S")) {
-            var temp: Node = d;
-            temp.group = 1;
-            nodes.push(temp);
-          }
-          else {
-            nodes.push(<Node>d);
-          }
-        });
-      }
-      else if (this.selected.device == "All_Devices") {
-        data.nodes.forEach((d) => {
-          nodes.push(<Node>d);
-        });
-      }
-      else {
-        data.nodes.forEach((d) => {
-          if (d.id == this.selected.device) {
-            var temp: Node = d;
-            temp.group = 1;
-            nodes.push(temp);
-          }
-          else {
-            nodes.push(<Node>d);
-          }
-        });
-      }
+      data.nodes.forEach((d) => { //For every node in the returned data store it in local node array and append static device lis
+        nodes.push(<Node>d);
+      });
 
       data.links.forEach((d) => { //For every node in the returned data store it in local node array and append static device lis
         links.push(<Link>d);
@@ -255,7 +219,8 @@ export class HomeComponent implements OnInit {
         .attr('r', 6)
         .attr('fill', (d: any) => color(d.group)) //Create circles based of nodes decided colour from id
         .attr('cx', function (d: any) { return d.x; })
-        .attr('cy', function (d: any) { return d.y; });
+        .attr('cy', function (d: any) { return d.y; })
+        .attr('name', function (d: any) { return d.id; });
 
       const label = svg.selectAll('.text')
         .data(nodes)
@@ -267,7 +232,8 @@ export class HomeComponent implements OnInit {
         .style("font-size", 5)
         .attr("x", function (d: any) { return d.x; })
         .attr("y", function (d: any) { return d.y; });
-
+        
+        this.updateColours();
     }, err => {
       this.noticeMessage = "There was trouble connecting to the server. Please try again.";  //If API call fails show error message by setting text and bools
       this.noticeSuccess = false;
@@ -283,7 +249,6 @@ export class HomeComponent implements OnInit {
   setDevice($device) {
     this.selected.device = $device; //Set selected device from html
     this.versionSelectCheck();
-    this.init2();
   }
 
   setCommand($command) {
@@ -364,6 +329,8 @@ export class HomeComponent implements OnInit {
   }
 
   versionSelectCheck() { //Runs everytime a new device is selected while restore or delete are selected
+
+    this.updateColours();
 
     this.versionsList = []; //Initalise to blank to avoid duplicates
 
@@ -569,5 +536,40 @@ export class HomeComponent implements OnInit {
     var tempArray = [] //Empty array on new values and append to a new array, then set the version list.
     tempArray.push(version);
     this.selected.version = tempArray;
+  }
+
+  updateColours(){
+    if (this.selected.device == "All_Routers") {
+      d3.selectAll('circle').style('fill',function(d:any){
+        if(d.id.includes("R"))
+        {
+          return "#ff7f0e";
+        }
+      });
+    }
+    else if (this.selected.device == "All_Switches") {
+      d3.selectAll('circle').style('fill',function(d:any){
+        if(d.id.includes("S"))
+        {
+          return "#ff7f0e";
+        }
+      });
+    }
+    else if (this.selected.device == "All_Devices") {
+      d3.selectAll('circle').style('fill',function(d:any){
+        return "#ff7f0e";
+      });
+    }
+
+    else{
+      var inScope = this.selected.device;
+      d3.selectAll('circle').style('fill',function(d:any) {
+
+        if(d.id == inScope)
+        {
+          return "#ff7f0e";
+        }
+      });
+    }
   }
 }
