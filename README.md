@@ -46,13 +46,13 @@ To remove unused interfaces, it is the same as before except selecting the remov
 
 1. Open/Install VS code, Install Node.js and NPM if they are not already on your machine and ensure your network is accessible from the computer you wish to set this up on.
 
-2.Download the repo.
+2. Download the repo.
 
 3. Open a console and navigate to the folder ‘…\NetVison’ and then run the command ‘npm install’ command to install the required packages.
  
 4. Then run the command ‘ng serve’ and wait until the web server starts up.
  
-5. Open another terminal and navigate to the folder ‘\NetVision\Express_API’ and run the ‘npm install’ command followed by ‘npm start’ which will start up the express API which will also begin the automatic backup process. Pleas note: IP addresses for routers and switch are set manually within ansible(see Ansible_Files within node Express_API folder which should be used on linux nmachine to setup ansible according to the API code).  
+5. Open another terminal and navigate to the folder ‘\NetVision\Express_API’ and run the ‘npm install’ command followed by ‘npm start’ which will start up the express API which will also begin the automatic backup process. Please note: IP addresses for routers and switch are set manually within ansible(see Ansible_Files within node Express_API folder which should be used on linux nmachine to setup ansible according to the API code).  
 
 6. Navigate to the web address: http://localhost:4200/, and you’ll find the website running locally.
 
