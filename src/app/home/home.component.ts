@@ -129,8 +129,6 @@ export class HomeComponent implements OnInit {
       const nodes: Node[] = [];
       const links: Link[] = [];
 
-      console.log(data.nodes);
-
       data.nodes.forEach((d) => { //For every node in the returned data append to static device list
         this.devices.push(<Node>d.id)
       });
@@ -305,7 +303,6 @@ export class HomeComponent implements OnInit {
     }
     else { //If it is anything other than delete then pass the selecteddata to the API and proccess the response
       this.subscription = this.data.runPlaybook(this.selected).subscribe(data => {
-        console.log(data);
         if (data.status == "201") {  //If returned data is not null show success message in the alert diagram.
           this.noticeMessage = "Backup or restore completed successfully!";
           this.noticeSuccess = true;
@@ -540,7 +537,7 @@ export class HomeComponent implements OnInit {
 
   updateColours(){
     if (this.selected.device == "All_Routers") {
-      d3.selectAll('circle').style('fill',function(d:any){
+      d3.selectAll('circle').style('fill',function(d:any){ //Change colour based on selection using d.id rather than assigned d.name due to automatic renaming.
         if(d.id.includes("R"))
         {
           return "#ff7f0e";
