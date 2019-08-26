@@ -44,17 +44,23 @@ To remove unused interfaces, it is the same as before except selecting the remov
 
 ## Installation
 
+*Important while setting up the API on the linux machine 
+
 1. Open/Install VS code, Install Node.js and NPM if they are not already on your machine and ensure your network is accessible from the computer you wish to set this up on.
 
-2. Download the repo.
+2. Download the repo to your nginx or other web host sites folder.
 
 3. Open a console and navigate to the folder ‘…\NetVison’ and then run the command ‘npm install’ command to install the required packages.
- 
-4. Then run the command ‘ng serve’ and wait until the web server starts up.
- 
-5. Open another terminal and navigate to the folder ‘\NetVision\Express_API’ and run the ‘npm install’ command followed by ‘npm start’ which will start up the express API which will also begin the automatic backup process. Please note: IP addresses for routers and switch are set manually within ansible(see Ansible_Files within node Express_API folder which should be used on linux nmachine to setup ansible according to the API code).  
 
-6. Navigate to the web address: http://localhost:4200/, and you’ll find the website running locally.
+4. Change the serverAddress in order to connect to the ip address of your linux host on line 14 of the data.service.ts file to match the address of your API(Linux Machine).
+ 
+5. Then run the command ‘ng serve’ and wait until the web server starts up.
+ 
+6. Copy the Ansible_FilesAndBash folder within Express_API to your ansible enviroment and ensure that you have edited the vault_pass and vault file to include a password and have encrypted the vars file using the commands detailed [here](https://docs.ansible.com/ansible/latest/user_guide/vault.html#encrypt-string-for-use-in-yaml) and you will also need to set the IP addresses for routers and switches within the hosts file.
+
+7. Open another terminal and navigate to the folder ‘\NetVision\Express_API’ and run the ‘npm install’ command followed by ‘npm start’ which will start up the express API which will also begin the automatic backup process which by default will backup to documents backups folder and in the folder above this once you have refreshed devices it will create a collection that the network map will use.   
+
+8. Navigate to the web address: http://localhost:4200/, and you’ll find the website running locally.
 
 ## Issues
 
