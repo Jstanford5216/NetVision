@@ -5,6 +5,7 @@ const shell = require('shelljs');
 const fs = require('fs');
 const cors = require('cors');
 const { fork } = require('child_process');
+const si = require('systeminformation');
 
 const app = express();
 
@@ -145,6 +146,12 @@ app.route('/api/:name').get((req, res) => { //Get request and response object fo
       }, function (err) { console.log(err); }); //if promise fails due to exception show error on console
     }
     setTimeout(afterTimeout, 10000);
+  }
+  else if (query == "getSysInfo")
+  {
+    si.cpu()
+    .then(data => res.send(data))
+    .catch(error => res.send(error));
   }
   else {
     const requestedDevice = req.params['name'];
